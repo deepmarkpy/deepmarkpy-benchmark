@@ -1,6 +1,5 @@
-import os
 import numpy as np
-from watermarking_wrapper import WatermarkingWrapper  # Assuming your class is in watermarking_wrapper.py
+from watermarking_wrapper import WatermarkingWrapper
 
 class Attacks:
     """
@@ -81,7 +80,7 @@ class Attacks:
         matches = np.sum(original == detected)
         return matches / len(original) * 100
 
-    def additive_noise_attack(self, audio, noise_level=1):
+    def additive_noise_attack(self, audio, noise_level=0.01):
         """
         Additive Gaussian noise attack.
 

@@ -1,4 +1,3 @@
-import os
 import torch
 import librosa
 import numpy as np
@@ -83,7 +82,6 @@ class WatermarkingWrapper:
         else:
             watermark_data = np.split(watermark_data, len(watermark_data) // 8)
             watermark_data = [int("".join(map(str, arr)), 2) for arr in watermark_data]
-            print(watermark_data)
             watermarked_audio, _ = model.encode_wav(y, sr, watermark_data)
             return watermarked_audio
 
