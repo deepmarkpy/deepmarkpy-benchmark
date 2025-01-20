@@ -28,5 +28,5 @@ from attacks import Attacks
 # print(message)
 
 attacks = Attacks()
-results = attacks.benchmark(10*['harvard.wav'], 'AudioSeal', sampling_rate=16000)
+results = attacks.benchmark(['harvard.wav'], 'SilentCipher', sampling_rate=441000, mwm_type='other', collusion_size=100)
 print(results)

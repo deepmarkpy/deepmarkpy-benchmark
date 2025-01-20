@@ -1,6 +1,7 @@
 import torch
 import librosa
 import numpy as np
+from scipy.signal import resample
 
 from audioseal import AudioSeal
 import wavmark
@@ -45,15 +46,16 @@ class WatermarkingWrapper:
         except Exception as e:
             raise RuntimeError(f"Error loading models: {e}")
 
-    def embed(self, model_name, audio_path, watermark_data, output_path=None):
+    def embed(self, model_name, audio_input, watermark_data=None, output_path=None, input_sr= None):
         """
         Embed a watermark into an audio file using the specified model.
 
         Args:
             model_name (str): The name of the model to use ('AudioSeal', 'WavMark', or 'SilentCipher').
-            audio_path (str): Path to the input audio file.
-            watermark_data (np.ndarray): The binary watermark data to embed (e.g., a NumPy array of 0 and 1).
+            audio_input (str or np.ndarray): Path to the input audio file or a NumPy array representing the audio signal.
+            watermark_data (np.ndarray, optional): The binary watermark data to embed (e.g., a NumPy array of 0 and 1). Defaults to random generation.
             output_path (str, optional): Path to save the watermarked audio file. Currently unused in this implementation.
+            input_sr (int, optional): Sampling rate of the input NumPy array, if known. Required for resampling.
 
         Returns:
             np.ndarray: The watermarked audio as a NumPy array.
@@ -64,9 +66,21 @@ class WatermarkingWrapper:
         if model_name not in self.models:
             raise ValueError(f"Model '{model_name}' not found. Choose from {list(self.models.keys())}.")
 
+        if watermark_data is None:
+            watermark_data = np.random.randint(0, 2, size=40 if model_name == "SilentCipher" else 16, dtype=np.int32)
+
         sr = 44100 if model_name == 'SilentCipher' else 16000
-        y, sr = self.load_audio(audio_path, sr)
+        if isinstance(audio_input, str):
+            y, sr = self.load_audio(audio_input, target_sr=sr)
+        elif isinstance(audio_input, np.ndarray):
+            y = audio_input
+            if input_sr is None:
+                raise ValueError("input_sr must be specified for NumPy array input.")
+            if input_sr != sr:
+                num_samples = int(len(audio_input) * sr / input_sr)
+                y = resample(audio_input, num_samples)
         model = self.models[model_name]
+        watermarked_audio = None
         if model_name == "AudioSeal":
             model = model["generator"]
             wav = torch.tensor(y, dtype=torch.float32)
@@ -75,15 +89,18 @@ class WatermarkingWrapper:
             watermark = model.get_watermark(wav, message=msg, sample_rate=sr)
             watermarked_audio = wav + watermark
             watermarked_audio = watermarked_audio.detach().numpy()
-            return watermarked_audio
+            watermarked_audio = np.squeeze(watermarked_audio)
         elif model_name == 'WavMark':
             watermarked_audio, _ = wavmark.encode_watermark(model, y, watermark_data, show_progress=False)
-            return watermarked_audio
         else:
             watermark_data = np.split(watermark_data, len(watermark_data) // 8)
             watermark_data = [int("".join(map(str, arr)), 2) for arr in watermark_data]
             watermarked_audio, _ = model.encode_wav(y, sr, watermark_data)
-            return watermarked_audio
+
+        if input_sr is not None and input_sr != sr:
+            num_samples = int(len(watermarked_audio) * input_sr / sr)
+            watermarked_audio = resample(watermarked_audio, num_samples)
+        return watermarked_audio
 
     def detect(self, model_name, watermarked_audio, sampling_rate):
         """
@@ -105,6 +122,7 @@ class WatermarkingWrapper:
         model = self.models[model_name]
         if model_name == "AudioSeal":
             model = model["detector"]
+            watermarked_audio = np.expand_dims(watermarked_audio, axis=[0, 1])
             watermarked_audio = torch.tensor(watermarked_audio, dtype=torch.float32)
             _, message = model.detect_watermark(watermarked_audio, sampling_rate)
             message = message.squeeze().cpu().numpy()
@@ -113,8 +131,11 @@ class WatermarkingWrapper:
             message, _ = wavmark.decode_watermark(model, watermarked_audio, show_progress=False)
             return message
         else:
-            message = model.decode_wav(watermarked_audio, sampling_rate, phase_shift_decoding=False)
-            message = message['messages'][0]
+            message = model.decode_wav(watermarked_audio, sampling_rate, phase_shift_decoding=True)
+            try:
+                message = message['messages'][0]
+            except:
+                return None
             message = [np.array(list(f"{val:08b}"), dtype=np.int32) for val in message]
             message = np.concatenate(message)
             return message
