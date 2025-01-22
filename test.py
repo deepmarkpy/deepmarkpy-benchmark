@@ -1,6 +1,8 @@
 from watermarking_wrapper import WatermarkingWrapper
 import numpy as np
 from attacks import Attacks
+import os
+import json
 
 # wrapper = WatermarkingWrapper()
 
@@ -27,6 +29,12 @@ from attacks import Attacks
 
 # print(message)
 
+wav_files = ['data/'+f for f in os.listdir('data') if f.endswith(".wav")]
+
+wav_files = wav_files[:10]
+
 attacks = Attacks()
-results = attacks.benchmark(['harvard.wav'], 'SilentCipher', sampling_rate=441000, mwm_type='other', collusion_size=100)
-print(results)
+results = attacks.benchmark(wav_files, 'AudioSeal', sampling_rate=16000, mwm_type='other', collusion_size=10)
+
+with open('result.json', 'w') as fp:
+    json.dump(results, fp)

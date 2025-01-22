@@ -7,6 +7,8 @@ from audioseal import AudioSeal
 import wavmark
 import silentcipher
 
+from utils import load_audio
+
 class WatermarkingWrapper:
     """
     A unified wrapper class to embed and detect watermarks in audio files
@@ -46,7 +48,7 @@ class WatermarkingWrapper:
         except Exception as e:
             raise RuntimeError(f"Error loading models: {e}")
 
-    def embed(self, model_name, audio_input, watermark_data=None, output_path=None, input_sr= None):
+    def embed(self, model_name, audio_input, watermark_data=None, input_sr= None):
         """
         Embed a watermark into an audio file using the specified model.
 
@@ -54,7 +56,6 @@ class WatermarkingWrapper:
             model_name (str): The name of the model to use ('AudioSeal', 'WavMark', or 'SilentCipher').
             audio_input (str or np.ndarray): Path to the input audio file or a NumPy array representing the audio signal.
             watermark_data (np.ndarray, optional): The binary watermark data to embed (e.g., a NumPy array of 0 and 1). Defaults to random generation.
-            output_path (str, optional): Path to save the watermarked audio file. Currently unused in this implementation.
             input_sr (int, optional): Sampling rate of the input NumPy array, if known. Required for resampling.
 
         Returns:
@@ -71,7 +72,7 @@ class WatermarkingWrapper:
 
         sr = 44100 if model_name == 'SilentCipher' else 16000
         if isinstance(audio_input, str):
-            y, sr = self.load_audio(audio_input, target_sr=sr)
+            y, sr = load_audio(audio_input, target_sr=sr)
         elif isinstance(audio_input, np.ndarray):
             y = audio_input
             if input_sr is None:
@@ -139,20 +140,3 @@ class WatermarkingWrapper:
             message = [np.array(list(f"{val:08b}"), dtype=np.int32) for val in message]
             message = np.concatenate(message)
             return message
-
-    def load_audio(self, file_path, target_sr=None, mono=True):
-        """
-        Load an audio file and resample it to the specified sampling rate.
-
-        Args:
-            file_path (str): Path to the audio file.
-            target_sr (int, optional): Target sampling rate for the audio. If None, the original sampling rate is used.
-            mono (bool, optional): If True, the audio is converted to mono. Defaults to True.
-
-        Returns:
-            tuple: A tuple containing:
-                - y (np.ndarray): The audio signal as a NumPy array.
-                - sr (int): The sampling rate of the loaded audio.
-        """
-        y, sr = librosa.load(file_path, sr=target_sr, mono=mono)
-        return y, sr

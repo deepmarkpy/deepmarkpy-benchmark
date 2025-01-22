@@ -1,4 +1,5 @@
 import numpy as np
+from utils import load_audio, snr
 from watermarking_wrapper import WatermarkingWrapper
 import random
 import soundfile as sf
@@ -50,7 +51,9 @@ class Attacks:
             if watermark_data is None:
                 watermark_data = np.random.randint(0, 2, size=40 if model_name=='SilentCipher' else 16, dtype=np.int32)
 
-            watermarked_audio = self.wrapper.embed(model_name, filepath, watermark_data)
+            audio, sampling_rate = load_audio(filepath, target_sr=sampling_rate)
+            
+            watermarked_audio = self.wrapper.embed(model_name, audio, watermark_data, sampling_rate)
 
             for attack in attack_types:
                 if attack not in self.attacks:
@@ -64,17 +67,13 @@ class Attacks:
                 attack_kwargs['sampling_rate'] = sampling_rate
                 attack_kwargs['filepath'] = filepath
                 attacked_audio = self.attacks[attack](watermarked_audio, **attack_kwargs)
-
-                sf.write('test.wav', attacked_audio, samplerate=44100 if model_name=='SilentCipher' else 16000)
                 
                 detected_message = self.wrapper.detect(model_name, attacked_audio, sampling_rate=sampling_rate)
-
-                print(watermark_data)
-                print(detected_message)
                 
                 accuracy = self.compare_watermarks(watermark_data, detected_message)
                 results[filepath][attack] = {
                     "accuracy": accuracy,
+                    "snr": snr(audio, attacked_audio)
                 }
 
         return results
@@ -104,7 +103,7 @@ class Attacks:
         Returns:
             np.ndarray: The audio signal with noise added.
         """
-        noise_level = kwargs.get('noise_level', 0.01)
+        noise_level = kwargs.get('noise_level', 0.001)
         noise = np.random.normal(0, noise_level, audio.shape)
         return audio + noise
     
@@ -152,6 +151,7 @@ class Attacks:
                 - model_name (str): Name of the watermarking model.
                 - sampling_rate (int): Sampling rate of the audio.
                 - filepath (str): Path to the original audio file.
+                - collusion_size(int): Size of the collusion segment.
 
         Returns:
             np.ndarray: The recombined audio after the collusion attack.
