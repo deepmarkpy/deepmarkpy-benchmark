@@ -2,6 +2,7 @@ import numpy as np
 from utils import load_audio, snr
 from watermarking_wrapper import WatermarkingWrapper
 import random
+import pyrubberband as pyrb
 import soundfile as sf
 
 class Attacks:
@@ -21,7 +22,11 @@ class Attacks:
         self.attacks = {
             "additive_noise": self.additive_noise_attack,
             "multiple_watermarking": self.multiple_watermarking,
-            "collusion_attack": self.collusion_attack
+            "collusion_attack": self.collusion_attack,
+            "pitch_shift": self.pitch_shift,
+            "time_stretch": self.time_stretch,
+            "inverted_time_stretch": self.inverted_time_stretch,
+            "zero_cross_inserts": self.zero_cross_inserts
         }
 
     def benchmark(self, filepaths, model_name, watermark_data=None, attack_types=None, sampling_rate=16000, **kwargs):
@@ -67,13 +72,15 @@ class Attacks:
                 attack_kwargs['sampling_rate'] = sampling_rate
                 attack_kwargs['filepath'] = filepath
                 attacked_audio = self.attacks[attack](watermarked_audio, **attack_kwargs)
+
+                sf.write('test.wav', attacked_audio, sampling_rate)
                 
                 detected_message = self.wrapper.detect(model_name, attacked_audio, sampling_rate=sampling_rate)
                 
                 accuracy = self.compare_watermarks(watermark_data, detected_message)
                 results[filepath][attack] = {
                     "accuracy": accuracy,
-                    "snr": snr(audio, attacked_audio)
+                    "snr": "N/A" if np.abs(len(audio)-len(attacked_audio)>1) else snr(audio, attacked_audio)
                 }
 
         return results
@@ -185,3 +192,129 @@ class Attacks:
                 mixed_audio[remaining_start:] = second_audio[remaining_start:]
 
         return mixed_audio
+    
+    def pitch_shift(self, audio, **kwargs):
+        """
+        Perform pitch shifting using pyrubberband.
+
+        Args:
+            audio (np.ndarray): Input audio signal.
+            **kwargs: Additional parameters for pitch shifting.
+                - sampling_rate (int): Sampling rate of the audio in Hz (required).
+                - cents (float): Pitch shift in cents (1 cent = 1/100 of a semitone) (required).
+
+        Returns:
+            np.ndarray: The pitch-shifted audio signal.
+
+        Raises:
+            ValueError: If `sampling_rate` or `cents` is not provided in kwargs.
+
+        Notes:
+            - This function uses the pyrubberband library, which provides high-quality
+            pitch shifting without altering the speed of the audio.
+            - Ensure that pyrubberband and the Rubber Band Library are installed before use.
+        """
+        sampling_rate = kwargs.get('sampling_rate', None)
+        cents = kwargs.get('cents', None)
+
+        if sampling_rate is None or cents is None:
+            raise ValueError("Both 'sampling_rate' and 'cents' must be provided in kwargs.")
+
+        semitones = cents / 100
+        return pyrb.pitch_shift(audio, sampling_rate, semitones)
+    
+    def time_stretch(self, audio, **kwargs):
+        """
+        Perform time stretching on an audio signal using pyrubberband.
+
+        Args:
+            audio (np.ndarray): Input audio signal to be stretched.
+            **kwargs: Additional parameters for time stretching.
+                - sampling_rate (int): Sampling rate of the audio in Hz (required).
+                - stretch_rate (float): Stretching factor (>1 for slower, <1 for faster) (required).
+
+        Returns:
+            np.ndarray: The time-stretched audio signal.
+
+        Raises:
+            ValueError: If `sampling_rate` or `stretch_rate` is not provided in kwargs.
+
+        Notes:
+            - This function uses the pyrubberband library, which provides high-quality
+            time-stretching capabilities while maintaining pitch integrity.
+            - Ensure that pyrubberband and the Rubber Band Library are installed before use.
+            - Stretch rate of `1.0` implies no change in speed.
+            - Values greater than `1.0` slow down the audio, while values less than `1.0` speed it up.
+        """
+        sampling_rate = kwargs.get('sampling_rate', None)
+        stretch_rate = kwargs.get('stretch_rate', None)
+
+        if sampling_rate is None or stretch_rate is None:
+            raise ValueError("Both 'sampling_rate' and 'stretch_rate' must be provided in kwargs.")
+        
+        return pyrb.time_stretch(audio, sampling_rate, stretch_rate)
+    
+    def inverted_time_stretch(self, audio, **kwargs):
+        """
+        Perform an inverted time stretch operation.
+
+        Args:
+            audio (np.ndarray): Input audio signal.
+            **kwargs: Additional parameters for time stretching.
+                - inverted_stretch_rate (float): Stretching factor (>1 for slower, <1 for faster). Required.
+
+        Returns:
+            np.ndarray: The audio signal after time stretching and inverting.
+
+        Raises:
+            ValueError: If 'inverted_stretch_rate' is not provided in kwargs.
+        """
+        args = kwargs.copy()
+        stretch_rate = args.get('inverted_stretch_rate')
+        args.pop('stretch_rate')
+        if stretch_rate is None:
+            raise ValueError("'inverted_stretch_rate' must be provided in kwargs.")
+        audio = self.time_stretch(audio, stretch_rate = stretch_rate, **args)
+        return self.time_stretch(audio, stretch_rate = 1 / stretch_rate, **args)
+
+    def zero_cross_inserts(self, audio, **kwargs):
+        """
+        Perform Zero-Cross-Inserts on an audio signal.
+
+        Args:
+            audio (np.ndarray): Input audio signal.
+            **kwargs: Additional parameters for the operation.
+                - sampling_rate (int): Sampling rate of the audio in Hz (required).
+                - pause_length (int): Number of zeros to insert at each zero-crossing point. Default is 20.
+                - min_distance (float): Minimum distance between pauses in seconds. Default is 1.0.
+
+        Returns:
+            np.ndarray: Audio signal with inserted pauses at zero-crossing points.
+
+        Raises:
+            ValueError: If 'sampling_rate' is not provided in kwargs.
+        """
+
+        sampling_rate = kwargs.get('sampling_rate')
+        pause_length = kwargs.get('pause_length', 20)
+        min_distance = kwargs.get('min_distance', 1.0)
+
+        if sampling_rate is None:
+            raise ValueError("'sampling_rate' must be provided in kwargs.")
+
+        min_sample_distance = int(min_distance * sampling_rate)
+
+        zero_crossings = np.where(np.diff(np.sign(audio)))[0]
+
+        modified_audio = []
+        last_insert_pos = -min_sample_distance
+
+        for i in zero_crossings:
+            if i - last_insert_pos >= min_sample_distance:
+                modified_audio.extend(audio[last_insert_pos:i])
+                modified_audio.extend([0] * pause_length)
+                last_insert_pos = i
+
+        modified_audio.extend(audio[last_insert_pos:])
+
+        return np.array(modified_audio, dtype=audio.dtype)
