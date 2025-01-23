@@ -195,7 +195,7 @@ if __name__ == "__main__":
     y = replacement_attack(x, sr)
 
     print("Distortion:", 10*np.log10(np.linalg.norm(x-y)))
-    print("SNR:", 10*np.log10(np.linalg.norm(x)/np.linalg.norm(x-y)))
+    print("SNR:", 10*np.log10(np.sum(x**2)/np.sum((x - y)**2)))
     
     from scipy.io.wavfile import write
 
