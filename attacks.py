@@ -323,8 +323,6 @@ class Attacks:
 
         return np.array(modified_audio, dtype=audio.dtype)
 
-    import numpy as np
-
     def cut_samples(self, audio, **kwargs):
         """
         Perform a "Cut Samples" attack by randomly deleting short sequences of samples
@@ -386,9 +384,6 @@ class Attacks:
         modified_audio.extend(audio[prev_cut_end:])
 
         return np.array(modified_audio, dtype=audio.dtype)
-    
-
-    import numpy as np
 
     def flip_samples(self, audio, **kwargs):
         """
