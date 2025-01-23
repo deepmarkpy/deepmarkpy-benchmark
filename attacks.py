@@ -1,9 +1,10 @@
 import numpy as np
-from utils import load_audio, snr
+from utils import compute_threshold, load_audio, snr
 from watermarking_wrapper import WatermarkingWrapper
 import random
 import pyrubberband as pyrb
 import soundfile as sf
+import pywt
 
 class Attacks:
     """
@@ -27,7 +28,9 @@ class Attacks:
             "time_stretch": self.time_stretch,
             "inverted_time_stretch": self.inverted_time_stretch,
             "zero_cross_inserts": self.zero_cross_inserts,
-            "cut_samples": self.cut_samples
+            "cut_samples": self.cut_samples,
+            "flip_samples": self.flip_samples,
+            "wavelet_denoise": self.wavelet_denoise
         }
 
     def benchmark(self, filepaths, model_name, watermark_data=None, attack_types=None, sampling_rate=16000, **kwargs):
@@ -343,9 +346,9 @@ class Attacks:
             ValueError: If 'sampling_rate' is not provided in kwargs.
         """
         sampling_rate = kwargs.get('sampling_rate', None)
-        max_sequence_length = kwargs.get('max_sequence_length', 50)
-        num_sequences = kwargs.get('num_sequences', 20)
-        duration = kwargs.get('duration', 0.5)
+        max_sequence_length = kwargs.get('cut_max_sequence_length', 50)
+        num_sequences = kwargs.get('cut_num_sequences', 20)
+        duration = kwargs.get('cut_duration', 0.5)
         max_value_difference = kwargs.get('max_value_difference', 0.1)
 
         if sampling_rate is None:
@@ -383,3 +386,70 @@ class Attacks:
         modified_audio.extend(audio[prev_cut_end:])
 
         return np.array(modified_audio, dtype=audio.dtype)
+    
+
+    import numpy as np
+
+    def flip_samples(self, audio, **kwargs):
+        """
+        Perform a "Flip Samples" attack by randomly exchanging the positions
+        of selected samples in the audio signal.
+
+        Args:
+            audio (np.ndarray): Input audio signal.
+            **kwargs: Additional parameters.
+                - sampling_rate (int): Sampling rate of the audio in Hz (required).
+                - num_flips (int): Number of sample pairs to flip in the specified duration. Default is 20.
+                - duration (float): Duration (in seconds) over which flips should occur. Default is 0.5 seconds.
+
+        Returns:
+            np.ndarray: Audio signal with flipped sample positions.
+
+        Raises:
+            ValueError: If 'sampling_rate' is not provided in kwargs.
+        """
+        sampling_rate = kwargs.get('sampling_rate', None)
+        num_flips = kwargs.get('num_flips', 20)
+        duration = kwargs.get('flip_duration', 0.5)
+
+        if sampling_rate is None:
+            raise ValueError("'sampling_rate' must be provided in kwargs.")
+
+        total_samples = int(duration * sampling_rate)
+
+        total_samples = min(total_samples, len(audio))
+
+        flip_indices = np.random.choice(range(total_samples), size=num_flips * 2, replace=False)
+        flip_indices = flip_indices.reshape(-1, 2)
+
+        modified_audio = audio.copy()
+        for idx1, idx2 in flip_indices:
+            modified_audio[idx1], modified_audio[idx2] = modified_audio[idx2], modified_audio[idx1]
+
+        return modified_audio
+
+    def wavelet_denoise(self, audio, **kwargs):
+        """
+        Perform wavelet-based denoising on an audio signal.
+
+        Args:
+            audio (np.ndarray): Input audio signal.
+            **kwargs: Additional parameters for the wavelet denoising.
+                - wavelet (str): Wavelet type (e.g., 'db1', 'sym5'). Default is 'db1'.
+                - mode (str): Thresholding mode ('soft' or 'hard'). Default is 'soft'.
+
+        Returns:
+            np.ndarray: The denoised audio signal.
+        """
+        wavelet = kwargs.get('wavelet', 'db1')
+        mode = kwargs.get('mode', 'soft')
+
+        threshold = compute_threshold(audio, wavelet)
+
+        coeffs = pywt.wavedec(audio, wavelet)
+        coeffs_denoised = [pywt.threshold(c, threshold, mode=mode) for c in coeffs]
+
+        denoised_audio = pywt.waverec(coeffs_denoised, wavelet)
+
+        return denoised_audio
+    

@@ -1,5 +1,6 @@
 import librosa
 import numpy as np
+import pywt
 
 def load_audio(file_path, target_sr=None, mono=True):
     """
@@ -36,18 +37,49 @@ def snr(signal, noisy_signal):
         signal = signal[:min_len]
         noisy_signal = noisy_signal[:min_len]
 
-    # Calculate the noise by subtracting the clean signal from the noisy signal
     noise = noisy_signal - signal
 
-    # Calculate signal and noise powers
     signal_power = np.mean(signal**2)
     noise_power = np.mean(noise**2)
 
-    # Handle the case where noise power is zero
     if noise_power == 0:
         return np.inf
 
-    # Compute SNR in decibels
     snr = 10 * np.log10(signal_power / noise_power)
 
     return snr
+
+def compute_threshold(audio, wavelet):
+    """
+    Compute the universal threshold for wavelet-based denoising.
+
+    Args:
+        audio (np.ndarray): Input audio signal.
+        wavelet (str): Wavelet type (e.g., 'db1', 'sym5', etc.) used for decomposition.
+
+    Returns:
+        float: The calculated threshold value.
+
+    Notes:
+        - This function uses the universal threshold formula:
+          Threshold = sigma * sqrt(2 * log(n)),
+          where sigma is the noise standard deviation estimated from the detail coefficients,
+          and n is the length of the audio signal.
+        - The estimation of sigma uses the robust formula:
+          sigma = median(|coeffs[-1]|) / 0.6745,
+          which is based on the assumption of Gaussian white noise.
+        - The universal threshold is particularly effective for denoising signals corrupted by
+          additive white Gaussian noise.
+
+    Example:
+        >>> import pywt
+        >>> import numpy as np
+        >>> audio = np.random.randn(1024)  # Example noisy signal
+        >>> wavelet = 'db1'
+        >>> threshold = compute_threshold(audio, wavelet)
+        >>> print(f"Computed threshold: {threshold:.4f}")
+    """
+    coeffs = pywt.wavedec(audio, wavelet)
+    sigma = np.median(np.abs(coeffs[-1])) / 0.6745
+    threshold = sigma * np.sqrt(2 * np.log(len(audio)))
+    return threshold
