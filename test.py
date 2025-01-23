@@ -34,7 +34,7 @@ wav_files = ['data/'+f for f in os.listdir('data') if f.endswith(".wav")]
 wav_files = wav_files[:3]
 
 attacks = Attacks()
-results = attacks.benchmark(wav_files, 'AudioSeal', sampling_rate=16000, mwm_type='other', collusion_size=10, cents=5, stretch_rate=0.9, inverted_stretch_rate=2.0)
+results = attacks.benchmark(wav_files, 'WavMark', sampling_rate=16000, mwm_type='other', collusion_size=10, cents=5, stretch_rate=0.9, inverted_stretch_rate=2.0)
 
 with open('result.json', 'w') as fp:
     json.dump(results, fp)

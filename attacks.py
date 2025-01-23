@@ -26,7 +26,8 @@ class Attacks:
             "pitch_shift": self.pitch_shift,
             "time_stretch": self.time_stretch,
             "inverted_time_stretch": self.inverted_time_stretch,
-            "zero_cross_inserts": self.zero_cross_inserts
+            "zero_cross_inserts": self.zero_cross_inserts,
+            "cut_samples": self.cut_samples
         }
 
     def benchmark(self, filepaths, model_name, watermark_data=None, attack_types=None, sampling_rate=16000, **kwargs):
@@ -316,5 +317,69 @@ class Attacks:
                 last_insert_pos = i
 
         modified_audio.extend(audio[last_insert_pos:])
+
+        return np.array(modified_audio, dtype=audio.dtype)
+
+    import numpy as np
+
+    def cut_samples(self, audio, **kwargs):
+        """
+        Perform a "Cut Samples" attack by randomly deleting short sequences of samples
+        while maintaining inaudibility constraints.
+
+        Args:
+            audio (np.ndarray): Input audio signal.
+            **kwargs: Additional parameters.
+                - sampling_rate (int): Sampling rate of the audio in Hz (required).
+                - max_sequence_length (int): Maximum length of each cut sequence. Default is 50 samples.
+                - num_sequences (int): Number of sequences to cut in the specified duration. Default is 20.
+                - duration (float): Duration (in seconds) over which cuts should occur. Default is 0.5 seconds.
+                - max_value_difference (float): Maximum allowed difference between start and end sample of a cut. Default is 0.1.
+
+        Returns:
+            np.ndarray: Audio signal with random samples cut.
+
+        Raises:
+            ValueError: If 'sampling_rate' is not provided in kwargs.
+        """
+        sampling_rate = kwargs.get('sampling_rate', None)
+        max_sequence_length = kwargs.get('max_sequence_length', 50)
+        num_sequences = kwargs.get('num_sequences', 20)
+        duration = kwargs.get('duration', 0.5)
+        max_value_difference = kwargs.get('max_value_difference', 0.1)
+
+        if sampling_rate is None:
+            raise ValueError("'sampling_rate' must be provided in kwargs.")
+
+        total_samples = int(duration * sampling_rate)
+
+        total_samples = min(total_samples, len(audio))
+
+        cut_positions = np.random.choice(
+            range(total_samples - max_sequence_length),
+            size=num_sequences,
+            replace=False
+        )
+
+        cut_positions = np.sort(cut_positions)
+
+        modified_audio = []
+        prev_cut_end = 0
+
+        for start_pos in cut_positions:
+            sequence_length = np.random.randint(1, max_sequence_length + 1)
+            end_pos = start_pos + sequence_length
+
+            if end_pos >= len(audio):
+                break
+
+            if abs(audio[start_pos] - audio[end_pos]) > max_value_difference:
+                continue
+
+            modified_audio.extend(audio[prev_cut_end:start_pos])
+
+            prev_cut_end = end_pos
+
+        modified_audio.extend(audio[prev_cut_end:])
 
         return np.array(modified_audio, dtype=audio.dtype)
