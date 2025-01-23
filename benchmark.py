@@ -6,7 +6,7 @@ import pyrubberband as pyrb
 import soundfile as sf
 import pywt
 
-class Attacks:
+class Benchmark:
     """
     A class to perform various attacks on watermarking models and benchmark their performance.
     """
@@ -33,7 +33,7 @@ class Attacks:
             "wavelet_denoise": self.wavelet_denoise
         }
 
-    def benchmark(self, filepaths, model_name, watermark_data=None, attack_types=None, sampling_rate=16000, **kwargs):
+    def run(self, filepaths, model_name, watermark_data=None, attack_types=None, sampling_rate=16000, verbose=True, **kwargs):
         """
         Benchmark the watermarking models against selected attacks.
 
@@ -54,7 +54,8 @@ class Attacks:
         results = {}
 
         for filepath in filepaths:
-            print(f"Processing file: {filepath}")
+            if verbose:
+                print(f"Processing file: {filepath}")
             results[filepath] = {}
 
             if watermark_data is None:
@@ -68,8 +69,8 @@ class Attacks:
                 if attack not in self.attacks:
                     print(f"Attack '{attack}' not found. Skipping.")
                     continue
-
-                print(f"Applying attack: {attack}")
+                if verbose:
+                    print(f"Applying attack: {attack}")
                 attack_kwargs = {**kwargs}
                 attack_kwargs['model_name'] = model_name
                 attack_kwargs['watermark_data'] = watermark_data
@@ -88,6 +89,30 @@ class Attacks:
                 }
 
         return results
+
+    def compute_mean_accuracy(self, results):
+        """
+        Compute the mean accuracy for each attack across all files.
+
+        Args:
+            results (dict): Dictionary where each key is a filepath, and the value is another dictionary 
+                            containing attack results with accuracy and other metrics.
+
+        Returns:
+            dict: A dictionary with attacks as keys and their mean accuracy as values.
+        """
+        attack_accuracies = {}
+
+        for _, attacks in results.items():
+            for attack, metrics in attacks.items():
+                if attack not in attack_accuracies:
+                    attack_accuracies[attack] = []
+
+                attack_accuracies[attack].append(metrics["accuracy"])
+
+        mean_accuracies = {attack: np.mean(accuracies) for attack, accuracies in attack_accuracies.items()}
+
+        return mean_accuracies
 
     def compare_watermarks(self, original, detected):
         """
@@ -405,7 +430,7 @@ class Attacks:
         """
         sampling_rate = kwargs.get('sampling_rate', None)
         num_flips = kwargs.get('num_flips', 20)
-        duration = kwargs.get('flip_duration', 0.5)
+        duration = kwargs.get('flip_duration', 0.50)
 
         if sampling_rate is None:
             raise ValueError("'sampling_rate' must be provided in kwargs.")

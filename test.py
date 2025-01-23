@@ -1,6 +1,6 @@
 from watermarking_wrapper import WatermarkingWrapper
 import numpy as np
-from attacks import Attacks
+from benchmark import Benchmark
 import os
 import json
 
@@ -31,10 +31,12 @@ import json
 
 wav_files = ['data/'+f for f in os.listdir('data') if f.endswith(".wav")]
 
-wav_files = wav_files[:3]
+wav_files #= wav_files[:10]
 
-attacks = Attacks()
-results = attacks.benchmark(wav_files, 'WavMark', sampling_rate=16000, mwm_type='other', collusion_size=10, cents=5, stretch_rate=0.9, inverted_stretch_rate=2.0)
+attacks = Benchmark()
+results = attacks.run(wav_files, 'AudioSeal', sampling_rate=16000, mwm_type='same', collusion_size=5, cents=5, stretch_rate=0.8, inverted_stretch_rate=2.0)
+metrics = attacks.compute_mean_accuracy(results)
+print(metrics)
 
 with open('result.json', 'w') as fp:
     json.dump(results, fp)

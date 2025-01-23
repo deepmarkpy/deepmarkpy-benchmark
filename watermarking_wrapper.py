@@ -135,8 +135,8 @@ class WatermarkingWrapper:
             message = model.decode_wav(watermarked_audio, sampling_rate, phase_shift_decoding=True)
             try:
                 message = message['messages'][0]
+                message = [np.array(list(f"{val:08b}"), dtype=np.int32) for val in message]
+                message = np.concatenate(message)
             except:
                 return None
-            message = [np.array(list(f"{val:08b}"), dtype=np.int32) for val in message]
-            message = np.concatenate(message)
             return message
