@@ -314,8 +314,8 @@ class Benchmark:
             audio (np.ndarray): Input audio signal.
             **kwargs: Additional parameters for the operation.
                 - sampling_rate (int): Sampling rate of the audio in Hz (required).
-                - pause_length (int): Number of zeros to insert at each zero-crossing point. Default is 20.
-                - min_distance (float): Minimum distance between pauses in seconds. Default is 1.0.
+                - zero_cross_pause_length (int): Number of zeros to insert at each zero-crossing point. Default is 20.
+                - zero_cross_min_distance (float): Minimum distance between pauses in seconds. Default is 1.0.
 
         Returns:
             np.ndarray: Audio signal with inserted pauses at zero-crossing points.
@@ -325,8 +325,8 @@ class Benchmark:
         """
 
         sampling_rate = kwargs.get('sampling_rate')
-        pause_length = kwargs.get('pause_length', 20)
-        min_distance = kwargs.get('min_distance', 1.0)
+        pause_length = kwargs.get('zero_cross_pause_length', 20)
+        min_distance = kwargs.get('zero_cross_min_distance', 1.0)
 
         if sampling_rate is None:
             raise ValueError("'sampling_rate' must be provided in kwargs.")
@@ -357,10 +357,10 @@ class Benchmark:
             audio (np.ndarray): Input audio signal.
             **kwargs: Additional parameters.
                 - sampling_rate (int): Sampling rate of the audio in Hz (required).
-                - max_sequence_length (int): Maximum length of each cut sequence. Default is 50 samples.
-                - num_sequences (int): Number of sequences to cut in the specified duration. Default is 20.
-                - duration (float): Duration (in seconds) over which cuts should occur. Default is 0.5 seconds.
-                - max_value_difference (float): Maximum allowed difference between start and end sample of a cut. Default is 0.1.
+                - cut_max_sequence_length (int): Maximum length of each cut sequence. Default is 50 samples.
+                - cut_num_sequences (int): Number of sequences to cut in the specified duration. Default is 20.
+                - cut_duration (float): Duration (in seconds) over which cuts should occur. Default is 0.5 seconds.
+                - cut_max_value_difference (float): Maximum allowed difference between start and end sample of a cut. Default is 0.1.
 
         Returns:
             np.ndarray: Audio signal with random samples cut.
@@ -372,7 +372,7 @@ class Benchmark:
         max_sequence_length = kwargs.get('cut_max_sequence_length', 50)
         num_sequences = kwargs.get('cut_num_sequences', 20)
         duration = kwargs.get('cut_duration', 0.5)
-        max_value_difference = kwargs.get('max_value_difference', 0.1)
+        max_value_difference = kwargs.get('cut_max_value_difference', 0.1)
 
         if sampling_rate is None:
             raise ValueError("'sampling_rate' must be provided in kwargs.")
@@ -420,7 +420,7 @@ class Benchmark:
             **kwargs: Additional parameters.
                 - sampling_rate (int): Sampling rate of the audio in Hz (required).
                 - num_flips (int): Number of sample pairs to flip in the specified duration. Default is 20.
-                - duration (float): Duration (in seconds) over which flips should occur. Default is 0.5 seconds.
+                - flip_duration (float): Duration (in seconds) over which flips should occur. Default is 0.5 seconds.
 
         Returns:
             np.ndarray: Audio signal with flipped sample positions.
@@ -456,13 +456,13 @@ class Benchmark:
             audio (np.ndarray): Input audio signal.
             **kwargs: Additional parameters for the wavelet denoising.
                 - wavelet (str): Wavelet type (e.g., 'db1', 'sym5'). Default is 'db1'.
-                - mode (str): Thresholding mode ('soft' or 'hard'). Default is 'soft'.
+                - wt_mode (str): Thresholding mode ('soft' or 'hard'). Default is 'soft'.
 
         Returns:
             np.ndarray: The denoised audio signal.
         """
         wavelet = kwargs.get('wavelet', 'db1')
-        mode = kwargs.get('mode', 'soft')
+        mode = kwargs.get('wt_mode', 'soft')
 
         threshold = compute_threshold(audio, wavelet)
 
