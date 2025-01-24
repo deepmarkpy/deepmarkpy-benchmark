@@ -3,8 +3,9 @@ from utils import compute_threshold, load_audio, snr
 from watermarking_wrapper import WatermarkingWrapper
 import random
 import pyrubberband as pyrb
-import soundfile as sf
 import pywt
+from replacement_attack import replacement_attack
+
 
 class Benchmark:
     """
@@ -22,7 +23,8 @@ class Benchmark:
         self.wrapper = wrapper or WatermarkingWrapper()
         self.attacks = {
             "additive_noise": self.additive_noise_attack,
-            "multiple_watermarking": self.multiple_watermarking,
+            "same_model_watermarking": self.same_model_watermarking,
+            "cross_model_watermarking": self.cross_model_watermarking,
             "collusion_attack": self.collusion_attack,
             "pitch_shift": self.pitch_shift,
             "time_stretch": self.time_stretch,
@@ -30,10 +32,20 @@ class Benchmark:
             "zero_cross_inserts": self.zero_cross_inserts,
             "cut_samples": self.cut_samples,
             "flip_samples": self.flip_samples,
-            "wavelet_denoise": self.wavelet_denoise
+            "wavelet_denoise": self.wavelet_denoise,
+            "replacement_attack": self.replacement_attack,
         }
 
-    def run(self, filepaths, model_name, watermark_data=None, attack_types=None, sampling_rate=16000, verbose=True, **kwargs):
+    def run(
+        self,
+        filepaths,
+        model_name,
+        watermark_data=None,
+        attack_types=None,
+        sampling_rate=16000,
+        verbose=True,
+        **kwargs,
+    ):
         """
         Benchmark the watermarking models against selected attacks.
 
@@ -59,11 +71,18 @@ class Benchmark:
             results[filepath] = {}
 
             if watermark_data is None:
-                watermark_data = np.random.randint(0, 2, size=40 if model_name=='SilentCipher' else 16, dtype=np.int32)
+                watermark_data = np.random.randint(
+                    0,
+                    2,
+                    size=40 if model_name == "SilentCipher" else 16,
+                    dtype=np.int32,
+                )
 
             audio, sampling_rate = load_audio(filepath, target_sr=sampling_rate)
-            
-            watermarked_audio = self.wrapper.embed(model_name, audio, watermark_data, sampling_rate)
+
+            watermarked_audio = self.wrapper.embed(
+                model_name, audio, watermark_data, sampling_rate
+            )
 
             for attack in attack_types:
                 if attack not in self.attacks:
@@ -72,20 +91,24 @@ class Benchmark:
                 if verbose:
                     print(f"Applying attack: {attack}")
                 attack_kwargs = {**kwargs}
-                attack_kwargs['model_name'] = model_name
-                attack_kwargs['watermark_data'] = watermark_data
-                attack_kwargs['sampling_rate'] = sampling_rate
-                attack_kwargs['filepath'] = filepath
-                attacked_audio = self.attacks[attack](watermarked_audio, **attack_kwargs)
+                attack_kwargs["model_name"] = model_name
+                attack_kwargs["watermark_data"] = watermark_data
+                attack_kwargs["sampling_rate"] = sampling_rate
+                attack_kwargs["filepath"] = filepath
+                attacked_audio = self.attacks[attack](
+                    watermarked_audio, **attack_kwargs
+                )
 
-                sf.write('test.wav', attacked_audio, sampling_rate)
-                
-                detected_message = self.wrapper.detect(model_name, attacked_audio, sampling_rate=sampling_rate)
-                
+                detected_message = self.wrapper.detect(
+                    model_name, attacked_audio, sampling_rate=sampling_rate
+                )
+
                 accuracy = self.compare_watermarks(watermark_data, detected_message)
                 results[filepath][attack] = {
                     "accuracy": accuracy,
-                    "snr": "N/A" if np.abs(len(audio)-len(attacked_audio)>1) else snr(audio, attacked_audio)
+                    "snr": "N/A"
+                    if np.abs(len(audio) - len(attacked_audio) > 1)
+                    else snr(audio, attacked_audio),
                 }
 
         return results
@@ -95,7 +118,7 @@ class Benchmark:
         Compute the mean accuracy for each attack across all files.
 
         Args:
-            results (dict): Dictionary where each key is a filepath, and the value is another dictionary 
+            results (dict): Dictionary where each key is a filepath, and the value is another dictionary
                             containing attack results with accuracy and other metrics.
 
         Returns:
@@ -110,7 +133,10 @@ class Benchmark:
 
                 attack_accuracies[attack].append(metrics["accuracy"])
 
-        mean_accuracies = {attack: np.mean(accuracies) for attack, accuracies in attack_accuracies.items()}
+        mean_accuracies = {
+            attack: np.mean(accuracies)
+            for attack, accuracies in attack_accuracies.items()
+        }
 
         return mean_accuracies
 
@@ -139,43 +165,63 @@ class Benchmark:
         Returns:
             np.ndarray: The audio signal with noise added.
         """
-        noise_level = kwargs.get('noise_level', 0.001)
+        noise_level = kwargs.get("noise_level", 0.001)
         noise = np.random.normal(0, noise_level, audio.shape)
         return audio + noise
-    
-    def multiple_watermarking(self, audio, **kwargs):
+
+    def same_model_watermarking(self, audio, **kwargs):
         """
-        Perform multiple watermarking by embedding a watermark using a specified model
-        or a randomly chosen model if allowed.
+        Perform multiple watermarking using the same model repeatedly.
 
         Args:
             audio (np.ndarray): The input audio signal to watermark.
             **kwargs: Additional parameters for the watermarking process.
-                - model_name (str): The name of the current watermarking model.
+                - model_name (str): The name of the watermarking model to use.
                 - sampling_rate (int): The sampling rate of the audio signal.
-                - mwm_type (str): The type of multiple watermarking to apply.
-                                Defaults to 'other'.
+
+        Returns:
+            np.ndarray: The watermarked audio signal.
+        """
+        model_name = kwargs.get("model_name", None)
+        input_sr = kwargs.get("sampling_rate", None)
+
+        if model_name is None:
+            raise ValueError("A model name must be specified for same_model_watermarking.")
+
+        return self.wrapper.embed(model_name, audio, input_sr=input_sr)
+
+
+    def cross_model_watermarking(self, audio, **kwargs):
+        """
+        Perform multiple watermarking by embedding a watermark using a randomly chosen
+        model other than the specified one.
+
+        Args:
+            audio (np.ndarray): The input audio signal to watermark.
+            **kwargs: Additional parameters for the watermarking process.
+                - model_name (str): The name of the current watermarking model to avoid.
+                - sampling_rate (int): The sampling rate of the audio signal.
 
         Returns:
             np.ndarray: The watermarked audio signal.
 
-        Behavior:
-            - If `mwm_type` is 'other', a different model than `model_name` is chosen randomly
-            from the available models in the wrapper.
-            - If no other models are available, `None` is used as the model.
-            - Otherwise, the specified `model_name` is reused.
+        Raises:
+            ValueError: If no other models are available for cross-model watermarking.
         """
-        model_name = kwargs.get('model_name', None)
-        input_sr = kwargs.get('sampling_rate', None)
-        mwm_type = kwargs.get('mwm_type', 'other')
+        model_name = kwargs.get("model_name", None)
+        input_sr = kwargs.get("sampling_rate", None)
 
-        if mwm_type == 'other':
-            filtered_list = [key for key in self.wrapper.models.keys() if key != model_name]
-            new_model_name = random.choice(filtered_list) if filtered_list else None
-        else:
-            new_model_name = model_name
+        filtered_list = [
+            key for key in self.wrapper.models.keys() if key != model_name
+        ]
+
+        if not filtered_list:
+            raise ValueError("No other models are available for cross_model_watermarking.")
+
+        new_model_name = random.choice(filtered_list)
+
         return self.wrapper.embed(new_model_name, audio, input_sr=input_sr)
-    
+
     def collusion_attack(self, audio, **kwargs):
         """
         Perform a collusion attack by embedding a second watermark into the audio and
@@ -192,15 +238,17 @@ class Benchmark:
         Returns:
             np.ndarray: The recombined audio after the collusion attack.
         """
-        model_name = kwargs.get('model_name', None)
-        filepath = kwargs.get('filepath', None)
+        model_name = kwargs.get("model_name", None)
+        filepath = kwargs.get("filepath", None)
 
         if model_name is None or filepath is None:
-            raise ValueError("Both 'model_name' and 'filepath' must be provided for the collusion attack.")
+            raise ValueError(
+                "Both 'model_name' and 'filepath' must be provided for the collusion attack."
+            )
 
         second_audio = self.wrapper.embed(model_name, filepath)
 
-        segment_size = kwargs.get('collusion_size', 25)
+        segment_size = kwargs.get("collusion_size", 25)
         num_segments = len(audio) // segment_size
         mixed_audio = np.zeros_like(audio)
 
@@ -221,7 +269,7 @@ class Benchmark:
                 mixed_audio[remaining_start:] = second_audio[remaining_start:]
 
         return mixed_audio
-    
+
     def pitch_shift(self, audio, **kwargs):
         """
         Perform pitch shifting using pyrubberband.
@@ -243,15 +291,17 @@ class Benchmark:
             pitch shifting without altering the speed of the audio.
             - Ensure that pyrubberband and the Rubber Band Library are installed before use.
         """
-        sampling_rate = kwargs.get('sampling_rate', None)
-        cents = kwargs.get('cents', None)
+        sampling_rate = kwargs.get("sampling_rate", None)
+        cents = kwargs.get("cents", None)
 
         if sampling_rate is None or cents is None:
-            raise ValueError("Both 'sampling_rate' and 'cents' must be provided in kwargs.")
+            raise ValueError(
+                "Both 'sampling_rate' and 'cents' must be provided in kwargs."
+            )
 
         semitones = cents / 100
         return pyrb.pitch_shift(audio, sampling_rate, semitones)
-    
+
     def time_stretch(self, audio, **kwargs):
         """
         Perform time stretching on an audio signal using pyrubberband.
@@ -275,14 +325,16 @@ class Benchmark:
             - Stretch rate of `1.0` implies no change in speed.
             - Values greater than `1.0` slow down the audio, while values less than `1.0` speed it up.
         """
-        sampling_rate = kwargs.get('sampling_rate', None)
-        stretch_rate = kwargs.get('stretch_rate', None)
+        sampling_rate = kwargs.get("sampling_rate", None)
+        stretch_rate = kwargs.get("stretch_rate", None)
 
         if sampling_rate is None or stretch_rate is None:
-            raise ValueError("Both 'sampling_rate' and 'stretch_rate' must be provided in kwargs.")
-        
+            raise ValueError(
+                "Both 'sampling_rate' and 'stretch_rate' must be provided in kwargs."
+            )
+
         return pyrb.time_stretch(audio, sampling_rate, stretch_rate)
-    
+
     def inverted_time_stretch(self, audio, **kwargs):
         """
         Perform an inverted time stretch operation.
@@ -299,12 +351,12 @@ class Benchmark:
             ValueError: If 'inverted_stretch_rate' is not provided in kwargs.
         """
         args = kwargs.copy()
-        stretch_rate = args.get('inverted_stretch_rate')
-        args.pop('stretch_rate')
+        stretch_rate = args.get("inverted_stretch_rate")
+        args.pop("stretch_rate")
         if stretch_rate is None:
             raise ValueError("'inverted_stretch_rate' must be provided in kwargs.")
-        audio = self.time_stretch(audio, stretch_rate = stretch_rate, **args)
-        return self.time_stretch(audio, stretch_rate = 1 / stretch_rate, **args)
+        audio = self.time_stretch(audio, stretch_rate=stretch_rate, **args)
+        return self.time_stretch(audio, stretch_rate=1 / stretch_rate, **args)
 
     def zero_cross_inserts(self, audio, **kwargs):
         """
@@ -324,9 +376,9 @@ class Benchmark:
             ValueError: If 'sampling_rate' is not provided in kwargs.
         """
 
-        sampling_rate = kwargs.get('sampling_rate')
-        pause_length = kwargs.get('zero_cross_pause_length', 20)
-        min_distance = kwargs.get('zero_cross_min_distance', 1.0)
+        sampling_rate = kwargs.get("sampling_rate")
+        pause_length = kwargs.get("zero_cross_pause_length", 20)
+        min_distance = kwargs.get("zero_cross_min_distance", 1.0)
 
         if sampling_rate is None:
             raise ValueError("'sampling_rate' must be provided in kwargs.")
@@ -368,11 +420,11 @@ class Benchmark:
         Raises:
             ValueError: If 'sampling_rate' is not provided in kwargs.
         """
-        sampling_rate = kwargs.get('sampling_rate', None)
-        max_sequence_length = kwargs.get('cut_max_sequence_length', 50)
-        num_sequences = kwargs.get('cut_num_sequences', 20)
-        duration = kwargs.get('cut_duration', 0.5)
-        max_value_difference = kwargs.get('cut_max_value_difference', 0.1)
+        sampling_rate = kwargs.get("sampling_rate", None)
+        max_sequence_length = kwargs.get("cut_max_sequence_length", 50)
+        num_sequences = kwargs.get("cut_num_sequences", 20)
+        duration = kwargs.get("cut_duration", 0.5)
+        max_value_difference = kwargs.get("cut_max_value_difference", 0.1)
 
         if sampling_rate is None:
             raise ValueError("'sampling_rate' must be provided in kwargs.")
@@ -384,7 +436,7 @@ class Benchmark:
         cut_positions = np.random.choice(
             range(total_samples - max_sequence_length),
             size=num_sequences,
-            replace=False
+            replace=False,
         )
 
         cut_positions = np.sort(cut_positions)
@@ -428,9 +480,9 @@ class Benchmark:
         Raises:
             ValueError: If 'sampling_rate' is not provided in kwargs.
         """
-        sampling_rate = kwargs.get('sampling_rate', None)
-        num_flips = kwargs.get('num_flips', 20)
-        duration = kwargs.get('flip_duration', 0.50)
+        sampling_rate = kwargs.get("sampling_rate", None)
+        num_flips = kwargs.get("num_flips", 20)
+        duration = kwargs.get("flip_duration", 0.50)
 
         if sampling_rate is None:
             raise ValueError("'sampling_rate' must be provided in kwargs.")
@@ -439,12 +491,17 @@ class Benchmark:
 
         total_samples = min(total_samples, len(audio))
 
-        flip_indices = np.random.choice(range(total_samples), size=num_flips * 2, replace=False)
+        flip_indices = np.random.choice(
+            range(total_samples), size=num_flips * 2, replace=False
+        )
         flip_indices = flip_indices.reshape(-1, 2)
 
         modified_audio = audio.copy()
         for idx1, idx2 in flip_indices:
-            modified_audio[idx1], modified_audio[idx2] = modified_audio[idx2], modified_audio[idx1]
+            modified_audio[idx1], modified_audio[idx2] = (
+                modified_audio[idx2],
+                modified_audio[idx1],
+            )
 
         return modified_audio
 
@@ -461,8 +518,8 @@ class Benchmark:
         Returns:
             np.ndarray: The denoised audio signal.
         """
-        wavelet = kwargs.get('wavelet', 'db1')
-        mode = kwargs.get('wt_mode', 'soft')
+        wavelet = kwargs.get("wavelet", "db1")
+        mode = kwargs.get("wt_mode", "soft")
 
         threshold = compute_threshold(audio, wavelet)
 
@@ -472,4 +529,45 @@ class Benchmark:
         denoised_audio = pywt.waverec(coeffs_denoised, wavelet)
 
         return denoised_audio
-    
+
+    def replacement_attack(self, audio, **kwargs):
+        """
+        Perform a replacement attack on an audio signal.
+
+        Args:
+            audio (np.ndarray): The input audio signal.
+            **kwargs: Additional parameters for the replacement attack:
+                - sampling_rate (int): The sampling rate of the audio signal in Hz (required).
+                - replacement_block_size (int): Size of each block for processing in samples (default: 1024).
+                - replacement_overlap_factor (float): Overlap factor between consecutive blocks (default: 0.75).
+                Must be in the range [0, 1), where 0 means no overlap and values closer to 1
+                indicate higher overlap.
+                - replacement_lower_bound (float): The lower bound of the similarity distance for considering a block as a candidate (default: 0).
+                - replacement_upper_bound (float): The upper bound of the similarity distance for considering a block as a candidate (default: 0).
+                - replacement_k (int): Maximum number of similar blocks to consider (default: 20).
+                - replacement_use_masking (bool): Whether to use psychoacoustic masking for distance calculation (default: False).
+
+        Returns:
+            np.ndarray: The processed audio signal with the replacement attack applied.
+
+        Raises:
+            ValueError: If the `sampling_rate` is not provided in `kwargs`.
+
+        """
+        sampling_rate = kwargs.get("sampling_rate", None)
+        block_size = kwargs.get("replacement_block_size", 1024)
+        overlap_factor = kwargs.get("replacement_overlap_factor", 0.75)
+        lower_bound = kwargs.get("replacement_lower_bound", 0)
+        upper_bound = kwargs.get("replacement_upper_bound", 10)
+        use_masking = kwargs.get("replacement_use_masking", False)
+        if sampling_rate is None:
+            raise ValueError("'sampling_rate' must be provided in kwargs.")
+        return replacement_attack(
+            x=audio,
+            sampling_rate=sampling_rate,
+            block_size=block_size,
+            overlap_factor=overlap_factor,
+            lower_bound=lower_bound,
+            upper_bound=upper_bound,
+            use_masking=use_masking,
+        )

@@ -8,7 +8,6 @@ def main():
     parser.add_argument("--wav_files_dir", type=str, help="Path to the directory containing .wav files.")
     parser.add_argument("--model_name", type=str, choices=["AudioSeal", "WavMark", "SilentCipher"], required=True,
                         help="Name of the model to benchmark ('AudioSeal', 'WavMark', or 'SilentCipher').")
-    parser.add_argument("--mwm_type", type=str, default="same", choices=["same", "other"], help="Multiple watermarking type (default: same).")
     parser.add_argument("--collusion_size", type=int, default=5, help="Number of watermarked signals to use in a collusion attack (default: 5).")
     parser.add_argument("--cents", type=float, default=5.0, help="Pitch shift in cents for pitch shifting attack (default: 5).")
     parser.add_argument("--stretch_rate", type=float, default=0.8, help="Stretch rate for time stretch attack (default: 0.8).")
@@ -37,7 +36,6 @@ def main():
         wav_files,
         model_name=args.model_name,
         sampling_rate=sampling_rate,
-        mwm_type=args.mwm_type,
         collusion_size=args.collusion_size,
         cents=args.cents,
         stretch_rate=args.stretch_rate,

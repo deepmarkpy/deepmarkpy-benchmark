@@ -1,5 +1,4 @@
 import torch
-import librosa
 import numpy as np
 from scipy.signal import resample
 
@@ -137,6 +136,6 @@ class WatermarkingWrapper:
                 message = message['messages'][0]
                 message = [np.array(list(f"{val:08b}"), dtype=np.int32) for val in message]
                 message = np.concatenate(message)
-            except:
+            except:  # noqa: E722
                 return None
             return message
