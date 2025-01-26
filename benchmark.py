@@ -5,6 +5,7 @@ import random
 import pyrubberband as pyrb
 import pywt
 from replacement_attack import replacement_attack
+import soundfile as sf
 
 
 class Benchmark:
@@ -33,7 +34,7 @@ class Benchmark:
             "cut_samples": self.cut_samples,
             "flip_samples": self.flip_samples,
             "wavelet_denoise": self.wavelet_denoise,
-            "replacement_attack": self.replacement_attack,
+            "replacement_attack": self.replacement_attack
         }
 
     def run(
