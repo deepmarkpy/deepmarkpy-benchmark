@@ -5,7 +5,6 @@ import random
 import pyrubberband as pyrb
 import pywt
 from replacement_attack import replacement_attack
-import soundfile as sf
 
 
 class Benchmark:
@@ -166,7 +165,7 @@ class Benchmark:
         Returns:
             np.ndarray: The audio signal with noise added.
         """
-        noise_level = kwargs.get("noise_level", 0.001)
+        noise_level = kwargs.get("noise_level", 0.003)
         noise = np.random.normal(0, noise_level, audio.shape)
         return audio + noise
 

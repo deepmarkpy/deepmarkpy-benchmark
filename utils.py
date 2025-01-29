@@ -71,13 +71,6 @@ def compute_threshold(audio, wavelet):
         - The universal threshold is particularly effective for denoising signals corrupted by
           additive white Gaussian noise.
 
-    Example:
-        >>> import pywt
-        >>> import numpy as np
-        >>> audio = np.random.randn(1024)  # Example noisy signal
-        >>> wavelet = 'db1'
-        >>> threshold = compute_threshold(audio, wavelet)
-        >>> print(f"Computed threshold: {threshold:.4f}")
     """
     coeffs = pywt.wavedec(audio, wavelet)
     sigma = np.median(np.abs(coeffs[-1])) / 0.6745

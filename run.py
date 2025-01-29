@@ -11,7 +11,7 @@ def main():
     parser.add_argument("--attacks", type=str, nargs="+", default=None, help="List of attacks to apply. Defaults to all attacks.")
     parser.add_argument("--collusion_size", type=int, default=5, help="Number of watermarked signals to use in a collusion attack (default: 5).")
     parser.add_argument("--cents", type=float, default=5.0, help="Pitch shift in cents for pitch shifting attack (default: 5).")
-    parser.add_argument("--stretch_rate", type=float, default=1.4, help="Stretch rate for time stretch attack (default: 0.8).")
+    parser.add_argument("--stretch_rate", type=float, default=1.4, help="Stretch rate for time stretch attack (default: 1.4).")
     parser.add_argument("--inverted_stretch_rate", type=float, default=2.0, help="Inverted stretch rate for inverted time stretch attack (default: 2.0).")
     parser.add_argument("--noise_level", type=float, default=0.003, help="Noise level for additive noise attack (default: 0.001).")
     parser.add_argument("--zero_cross_pause_length", type=int, default=20, help="Pause length in samples for zero-cross insert attack (default: 20).")
