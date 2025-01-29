@@ -1,12 +1,11 @@
 import torch
 import numpy as np
-from scipy.signal import resample
 
 from audioseal import AudioSeal
 import wavmark
 import silentcipher
 
-from utils import load_audio
+from utils import load_audio, resample_audio
 
 class WatermarkingWrapper:
     """
@@ -77,8 +76,7 @@ class WatermarkingWrapper:
             if input_sr is None:
                 raise ValueError("input_sr must be specified for NumPy array input.")
             if input_sr != sr:
-                num_samples = int(len(audio_input) * sr / input_sr)
-                y = resample(audio_input, num_samples)
+                y = resample_audio(audio_input, input_sr, sr)
         model = self.models[model_name]
         watermarked_audio = None
         if model_name == "AudioSeal":
@@ -98,8 +96,7 @@ class WatermarkingWrapper:
             watermarked_audio, _ = model.encode_wav(y, sr, watermark_data)
 
         if input_sr is not None and input_sr != sr:
-            num_samples = int(len(watermarked_audio) * input_sr / sr)
-            watermarked_audio = resample(watermarked_audio, num_samples)
+            watermarked_audio = resample_audio(watermarked_audio, input_sr, sr)
         return watermarked_audio
 
     def detect(self, model_name, watermarked_audio, sampling_rate):

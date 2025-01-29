@@ -1,6 +1,7 @@
 import librosa
 import numpy as np
 import pywt
+from scipy.signal import resample_poly
 
 def load_audio(file_path, target_sr=None, mono=True):
     """
@@ -76,3 +77,25 @@ def compute_threshold(audio, wavelet):
     sigma = np.median(np.abs(coeffs[-1])) / 0.6745
     threshold = sigma * np.sqrt(2 * np.log(len(audio)))
     return threshold
+
+
+
+def resample_audio(audio, input_sr, target_sr):
+    """
+    Resamples an audio signal from input_sr to target_sr using polyphase filtering.
+
+    Args:
+        audio (np.ndarray): The input audio signal.
+        input_sr (int): The original sampling rate of the audio.
+        target_sr (int, optional): The target sampling rate. Default is 48000 Hz.
+
+    Returns:
+        np.ndarray: The resampled audio signal.
+    """
+    if input_sr != target_sr:
+        gcd = np.gcd(input_sr, target_sr)
+        up = target_sr // gcd
+        down = input_sr // gcd
+        audio = resample_poly(audio, up, down)
+    
+    return audio

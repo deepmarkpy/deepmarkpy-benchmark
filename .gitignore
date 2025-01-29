@@ -11,6 +11,8 @@ __pycache__/
 
 *.json
 
+*.ts
+
 # Distribution / packaging
 .Python
 build/

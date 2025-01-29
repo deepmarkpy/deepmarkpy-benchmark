@@ -1,10 +1,9 @@
 import numpy as np
-from utils import compute_threshold, load_audio, snr
+from utils import compute_threshold, load_audio, resample_audio, snr
 from watermarking_wrapper import WatermarkingWrapper
 import random
 import pyrubberband as pyrb
 import torch
-import torchaudio
 from vaewmattacker import VAEWMAttacker
 import pywt
 from replacement_attack import replacement_attack
@@ -36,7 +35,8 @@ class Benchmark:
             "cut_samples": self.cut_samples,
             "flip_samples": self.flip_samples,
             "wavelet_denoise": self.wavelet_denoise,
-            "replacement_attack": self.replacement_attack
+            "replacement_attack": self.replacement_attack,
+            "vae_wm_attack": self.vae_wm_attack
         }
 
     def run(
@@ -576,37 +576,37 @@ class Benchmark:
         )
 
     def vae_wm_attack(self, audio, **kwargs):
-
-        """ 
-        Perform a VAE-based watermarking attack on an audio signal.
-
+        """
+        Applies a VAE-based watermarking attack on the given audio signal.
+        
         Args:
             audio (np.ndarray): The input audio signal.
-            **kwargs: Additional parameters for the attack.
-                - sampling_rate (int): The sampling rate of the audio signal in Hz (required).
+            **kwargs: Additional parameters.
+                - sampling_rate (int): The original sampling rate of the audio (required).
+
         Returns:
-            np.ndarray: The processed audio signal with the VAE-based watermarking attack applied.
+            np.ndarray: The attacked audio signal.
+
+        Raises:
+            ValueError: If 'sampling_rate' is not provided in kwargs.
         """
-        
-
-        sample_rate = kwargs.get("sampling_rate", None)
-
+        sampling_rate = kwargs.get("sampling_rate", None)
+        if sampling_rate is None:
+            raise ValueError("'sampling_rate' must be provided in kwargs.")
         audio = np.squeeze(audio)
-        
+
         block_size = 2048
         original_length = len(audio)
         new_length = (original_length // block_size) * block_size
         audio = audio[:new_length]
-        print(f"Trimming signal from {original_length} samples to {new_length} samples")
-        
-        waveform_tensor = torch.from_numpy(audio).float()
-        if sample_rate != 48000:
-            print(f"Resampling from {sample_rate} Hz to 48000 Hz")
-            resampler = torchaudio.transforms.Resample(sample_rate, 48000)
-            waveform_tensor = resampler(waveform_tensor)
-        
-        model = 'voice_vctk_b2048_r44100_z22.ts'
 
-        attacker = VAEWMAttacker(model_path=model, device='cpu')
+        audio = resample_audio(audio, sampling_rate, target_sr=48000)
+
+        waveform_tensor = torch.from_numpy(audio).float()
+
+        model = 'voice_vctk_b2048_r44100_z22.ts'
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        attacker = VAEWMAttacker(model=model, device=device)
         attacked = attacker.attack(waveform_tensor)
+
         return attacked
