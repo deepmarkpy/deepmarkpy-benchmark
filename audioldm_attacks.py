@@ -2,18 +2,11 @@
 To apply these attacks, you must run:
 pip3 install git+https://github.com/haoheliu/AudioLDM.git
 """
-
-"""
-To apply this attacks, you must run:
-pip3 install git+https://github.com/haoheliu/AudioLDM.git
-"""
 import torch
 import librosa
-import os
-import urllib
 import numpy as np
 
-from audioldm.utils import default_audioldm_config, MyProgressBar
+from audioldm.utils import default_audioldm_config
 from audioldm.audio.stft import TacotronSTFT
 from audioldm.audio.tools import normalize_wav, pad_wav, get_mel_from_wav
 from audioldm.pipeline import build_model
@@ -21,7 +14,7 @@ from audioldm.pipeline import build_model
 
 class AudioLDMAttacker:
     def __init__(self):
-        self.model = build_model()
+        self.model = build_model("models/audioLDM")
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
         else:
