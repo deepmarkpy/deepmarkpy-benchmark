@@ -8,10 +8,11 @@ class SpeechBrainAttacker:
         assert type=="waveform" or type=="spectral_mask", "type must be either 'waveform' or 'spectral_mask'."
 
         if type=="waveform":
-            self.model = WaveformEnhancement.from_hparams(source="speechbrain/mtl-mimic-voicebank", savedir='models/sepformer-wham16k-waveform-enhancement')
+            self.model = WaveformEnhancement.from_hparams(source="speechbrain/mtl-mimic-voicebank")
         else:
-            self.model = SpectralMaskEnhancement.from_hparams(source="speechbrain/metricgan-plus-voicebank", savedir='models/sepformer-wham16k-spectralmask-enhancement')
+            self.model = SpectralMaskEnhancement.from_hparams(source="speechbrain/metricgan-plus-voicebank")
         
+        self.model.eval()
     def attack(self, audio, sample_rate, noise_strength=0.01):
         assert abs(noise_strength) <= 0.01, "noise_strength should not be greater than 0.01."
         audio = librosa.resample(audio, orig_sr=sample_rate, target_sr=16000)

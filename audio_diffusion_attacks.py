@@ -50,7 +50,7 @@ class AudioDDPMAttacker(AudioDiffusionAttacker):
         super(AudioDDPMAttacker, self).__init__()
         self.model = DiffusionPipeline.from_pretrained("teticio/audio-diffusion-256", savedir="models/teticio")
         
-        self.model.to(self.device)
+        self.model.eval().to(self.device)
 
     def attack(self, audio, sampling_rate, steps=150):
         assert steps<=150,  "number of steps is too large."
@@ -59,8 +59,8 @@ class AudioDDPMAttacker(AudioDiffusionAttacker):
 class AudioDDIMAttacker(AudioDiffusionAttacker):
     def __init__(self):
         super(AudioDDIMAttacker, self).__init__()
-        self.model = DiffusionPipeline.from_pretrained("teticio/audio-diffusion-ddim-256", savedir="models/teticio")
-        self.model.to(self.device)
+        self.model = DiffusionPipeline.from_pretrained("teticio/audio-diffusion-ddim-256")
+        self.model.eval().to(self.device)
 
     def attack(self, audio, sampling_rate, steps=5):
         assert steps <= 5, "number of steps is too large."
