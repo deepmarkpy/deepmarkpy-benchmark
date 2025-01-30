@@ -25,6 +25,7 @@ class AudioDiffusionAttacker:
         seed = generator.seed()
 
         output = np.array([])
+        new_audio_slice = np.array([])
         not_first = 0
         for sample in range(len(audio) // stride):
             generator.manual_seed(seed)
@@ -47,7 +48,7 @@ class AudioDiffusionAttacker:
 class AudioDDPMAttacker(AudioDiffusionAttacker):
     def __init__(self):
         super(AudioDDPMAttacker, self).__init__()
-        self.model = DiffusionPipeline.from_pretrained("teticio/audio-diffusion-256")
+        self.model = DiffusionPipeline.from_pretrained("teticio/audio-diffusion-256", savedir="models/teticio")
         
         self.model.to(self.device)
 
@@ -58,7 +59,7 @@ class AudioDDPMAttacker(AudioDiffusionAttacker):
 class AudioDDIMAttacker(AudioDiffusionAttacker):
     def __init__(self):
         super(AudioDDIMAttacker, self).__init__()
-        self.model = DiffusionPipeline.from_pretrained("teticio/audio-diffusion-ddim-256")
+        self.model = DiffusionPipeline.from_pretrained("teticio/audio-diffusion-ddim-256", savedir="models/teticio")
         self.model.to(self.device)
 
     def attack(self, audio, sampling_rate, steps=5):
