@@ -68,7 +68,7 @@ class AudioDDIMAttacker(AudioDiffusionAttacker):
 
 
 if __name__ == "__main__":
-    x, sr = librosa.load("saxophone.wav", mono=True, sr=None)
+    x, sr = librosa.load("1.wav", mono=True, sr=None)
     attacker = AudioDDIMAttacker()
     y = attacker.attack(x, sr)
 
