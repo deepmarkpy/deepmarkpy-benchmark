@@ -5,4 +5,4 @@ services:
     ports:
       - "5001:5001"
     volumes:
-      - ../../../utils
+      - ".src/utils:app/utils"

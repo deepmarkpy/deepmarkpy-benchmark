@@ -8,9 +8,9 @@ class BaseAttack(abc.ABC):
     All attacks must implement the `attack` method.
     """
 
-    def __init__(self):
-        with open('config.json') as json_file:
-            self.config = json.load(json_file)
+    # def __init__(self):
+    #     with open('config.json') as json_file:
+    #         self.config = json.load(json_file)
 
     @abc.abstractmethod
     def apply(self, audio: np.ndarray, **kwargs) -> np.ndarray:

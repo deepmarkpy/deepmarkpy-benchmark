@@ -1,20 +1,27 @@
-FROM python:3.9
+FROM python:3.9-slim AS builder
 
-# Set working directory inside the container
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y ffmpeg
-
-# Copy and install dependencies
+# Install dependencies in a temporary layer
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --user -r requirements.txt
 
-# Copy model files popraviti
-COPY ../../../utils ./utils
+# Final image
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Copy only the installed dependencies
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
+# Install system dependencies
+RUN apt-get update
+
+COPY . .
 
 # Expose the service port
 EXPOSE 5001
 
 # Run the FastAPI server using Uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5001"]
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "5001"]

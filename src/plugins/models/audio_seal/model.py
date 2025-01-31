@@ -1,4 +1,5 @@
-from fastapi import requests
+import json
+import requests
 from src.core.base_model import BaseModel
 import numpy as np
 
@@ -6,7 +7,10 @@ import numpy as np
 class AudioSealModel(BaseModel):
     def __init__(self):
         super().__init__()
-        self.endpoint = self.config.get("endpoint", "http://localhost:5001")
+        self.endpoint = "http://localhost:5001"
+        # with open('config.json') as json_file:
+        #     self.config = json.load(json_file)
+        # self.endpoint = self.config.get("endpoint", "http://localhost:5001")
 
     def embed(
         self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int
