@@ -1,4 +1,5 @@
 import numpy as np
+from audio_diffusion_attacks import AudioDDIMAttacker
 from utils import compute_threshold, load_audio, resample_audio, snr
 from watermarking_wrapper import WatermarkingWrapper
 import random
@@ -36,7 +37,8 @@ class Benchmark:
             "flip_samples": self.flip_samples,
             "wavelet_denoise": self.wavelet_denoise,
             "replacement_attack": self.replacement_attack,
-            "vae_wm_attack": self.vae_wm_attack
+            "vae_wm_attack": self.vae_wm_attack,
+            "ddim_attack": self.ddim_attack
         }
 
     def run(
@@ -610,3 +612,10 @@ class Benchmark:
         attacked = attacker.attack(waveform_tensor)
 
         return attacked
+    
+    def ddim_attack(self, audio, **kwargs):
+        attacker = AudioDDIMAttacker()
+        sampling_rate = kwargs.get("sampling_rate", None)
+        if sampling_rate is None:
+            raise ValueError("'sampling_rate' must be provided in kwargs.")
+        return attacker.attack(audio, sampling_rate)

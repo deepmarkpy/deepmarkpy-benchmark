@@ -1,0 +1,6 @@
+{
+    "name": "AudioSeal",
+    "type": "docker",
+    "sampling_rate": 16000,
+    "endpoint": "http://audioseal:5001"
+}
