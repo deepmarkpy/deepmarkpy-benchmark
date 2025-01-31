@@ -6,8 +6,11 @@ import numpy as np
 from audioseal import AudioSeal
 import uvicorn
 import torch
+import logging
 
-from utils import resample_audio
+from utils.utils import resample_audio
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -20,12 +23,12 @@ with open('config.json') as json_file:
     config = json.load(json_file)
 
 class EmbedRequest(BaseModel):
-    audio: List[int]
+    audio: List[float]
     watermark_data: List[int]
     sampling_rate: int
 
 class DetectRequest(BaseModel):
-    audio: List[int]
+    audio: List[float]
     sampling_rate: int
 
 @app.post("/embed")
@@ -55,7 +58,7 @@ async def embed(request: EmbedRequest):
 async def detect(request: DetectRequest):
     """Detect a watermark from an audio file."""
     audio = np.array(request.audio)
-    sampling_rate = np.array(request.sampling_rate)
+    sampling_rate = request.sampling_rate
     detector = model["detector"]
     watermarked_audio = np.expand_dims(audio, axis=[0, 1])
     watermarked_audio = torch.tensor(watermarked_audio, dtype=torch.float32)

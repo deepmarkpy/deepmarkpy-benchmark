@@ -5,18 +5,12 @@ import numpy as np
 
 
 class AudioSealModel(BaseModel):
-    def __init__(self):
-        super().__init__()
-        self.endpoint = "http://localhost:5001"
-        # with open('config.json') as json_file:
-        #     self.config = json.load(json_file)
-        # self.endpoint = self.config.get("endpoint", "http://localhost:5001")
 
     def embed(
         self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int
     ) -> np.ndarray:
         response = requests.post(
-            self.endpoint + "/embed",
+            self.config["endpoint"] + "/embed",
             json={
                 "audio": audio.tolist(),
                 "watermark_data": watermark_data.tolist(),
@@ -27,7 +21,7 @@ class AudioSealModel(BaseModel):
 
     def detect(self, audio: np.ndarray, sampling_rate: int) -> np.ndarray:
         response = requests.post(
-            self.endpoint + "/detect",
+            self.config["endpoint"] + "/detect",
             json={
                 "audio": audio.tolist(),
                 "sampling_rate": sampling_rate

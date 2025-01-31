@@ -3,7 +3,7 @@ FROM python:3.9-slim AS builder
 WORKDIR /app
 
 # Install dependencies in a temporary layer
-COPY requirements.txt .
+COPY /src/plugins/models/audio_seal/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Final image
@@ -18,7 +18,9 @@ ENV PATH=/root/.local/bin:$PATH
 # Install system dependencies
 RUN apt-get update
 
-COPY . .
+COPY src/utils ./utils
+
+COPY src/plugins/models/audio_seal .
 
 # Expose the service port
 EXPOSE 5001

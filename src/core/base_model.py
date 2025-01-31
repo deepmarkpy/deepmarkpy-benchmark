@@ -1,12 +1,25 @@
 import abc
 import json
 import numpy as np
+import os
 
 
 class BaseModel(abc.ABC):
     """
     Abstract base class for a Watermarking model.
     """
+
+
+    def __init__(self):
+        model_file = os.path.abspath(self.__class__.__module__.replace(".", "/") + ".py")
+        model_dir = os.path.dirname(model_file)
+        self.config_path = os.path.join(model_dir, "config.json")
+
+        if not os.path.exists(self.config_path):
+            raise FileNotFoundError(f"config.json not found in {self.config_path}")
+
+        with open(self.config_path, "r") as json_file:
+            self._config = json.load(json_file)
     
     @abc.abstractmethod
     def embed(self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int) -> np.ndarray:
@@ -25,4 +38,9 @@ class BaseModel(abc.ABC):
     @property
     def name(self) -> str:
         return self.__class__.__name__
+    
+    @property
+    def config(self) -> dict:
+        """Provides read-only access to the attack configuration."""
+        return self._config
     
