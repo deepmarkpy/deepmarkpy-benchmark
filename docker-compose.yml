@@ -1,8 +1,10 @@
 version: '3'
 services:
   audioseal:
-    build: ./src/plugins/models/audio_seal
+    build:
+      context: .
+      dockerfile: src/plugins/models/audio_seal/Dockerfile
     ports:
       - "5001:5001"
     volumes:
-      - ".src/utils:app/utils"
+      - "./src/utils:/app/utils"
