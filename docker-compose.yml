@@ -6,3 +6,9 @@ services:
       dockerfile: src/plugins/models/audio_seal/Dockerfile
     ports:
       - "5001:5001"
+  silentcipher:
+    build:
+      context: .
+      dockerfile: src/plugins/models/silent_cipher/Dockerfile
+    ports:
+      - "7001:7001"

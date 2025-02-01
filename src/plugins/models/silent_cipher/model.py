@@ -3,7 +3,7 @@ from src.core.base_model import BaseModel
 import numpy as np
 
 
-class AudioSealModel(BaseModel):
+class SilentCipherModel(BaseModel):
 
     def embed(
         self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int

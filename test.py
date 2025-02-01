@@ -1,3 +1,4 @@
+from src.plugins.models.silent_cipher.model import SilentCipherModel
 from src.plugins.models.audio_seal.model import AudioSealModel
 from src.utils.utils import load_audio
 import numpy as np
@@ -17,6 +18,21 @@ watermark_data = np.random.randint(
                 )
 
 watermarked_audio = model.embed(audio, watermark_data, sr)
+
+watermarked_audio = attack.apply(watermarked_audio)
+
+watermark = model.detect(watermarked_audio, sr)
+
+print(watermark)
+
+watermark_data = np.random.randint(
+                    0,
+                    2,
+                    size=40,
+                    dtype=np.int32,
+                )
+
+model = SilentCipherModel()
 
 watermarked_audio = attack.apply(watermarked_audio)
 

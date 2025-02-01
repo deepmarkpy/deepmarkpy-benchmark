@@ -1,0 +1,9 @@
+{
+    "name": "SilentCipher",
+    "type": "model",
+    "variant": "docker",
+    "sampling_rate": 44100,
+    "watermark_size": 40,
+    "port": 7001,
+    "endpoint": "http://localhost:7001"
+}

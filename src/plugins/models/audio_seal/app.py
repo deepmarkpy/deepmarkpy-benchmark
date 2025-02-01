@@ -51,6 +51,9 @@ async def embed(request: EmbedRequest):
     watermarked_audio = watermarked_audio.detach().numpy()
     watermarked_audio = np.squeeze(watermarked_audio)
 
+    if sampling_rate != config["sampling_rate"]:
+        watermarked_audio = resample_audio(watermarked_audio, sampling_rate, config["sampling_rate"])
+
     return {"watermarked_audio": watermarked_audio.tolist()}
 
 
@@ -67,4 +70,4 @@ async def detect(request: DetectRequest):
     return {"watermark": message.tolist()}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=5001)
+    uvicorn.run(app, host="0.0.0.0", port=config["port"])

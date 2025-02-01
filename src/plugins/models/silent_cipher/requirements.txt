@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+silentcipher
+librosa
+PyWavelets

@@ -1,7 +1,9 @@
 {
     "name": "AudioSeal",
-    "type": "docker",
+    "type": "model",
+    "variant": "docker",
     "sampling_rate": 16000,
     "watermark_size": 16,
+    "port": 5001,
     "endpoint": "http://localhost:5001"
 }
