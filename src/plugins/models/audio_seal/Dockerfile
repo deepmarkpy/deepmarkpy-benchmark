@@ -1,4 +1,4 @@
-FROM python:3.9-slim AS builder
+FROM python:3.11-slim-buster AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY /src/plugins/models/audio_seal/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Final image
-FROM python:3.9-slim
+FROM python:3.11-slim-buster
 
 WORKDIR /app
 
