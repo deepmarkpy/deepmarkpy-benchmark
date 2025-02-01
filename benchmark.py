@@ -159,21 +159,6 @@ class Benchmark:
         matches = np.sum(original == detected)
         return matches / len(original) * 100
 
-    def additive_noise_attack(self, audio, **kwargs):
-        """
-        Additive Gaussian noise attack.
-
-        Args:
-            audio (np.ndarray): The input audio signal.
-            noise_level (float): The standard deviation of the Gaussian noise.
-
-        Returns:
-            np.ndarray: The audio signal with noise added.
-        """
-        noise_level = kwargs.get("noise_level", 0.003)
-        noise = np.random.normal(0, noise_level, audio.shape)
-        return audio + noise
-
     def same_model_watermarking(self, audio, **kwargs):
         """
         Perform multiple watermarking using the same model repeatedly.
