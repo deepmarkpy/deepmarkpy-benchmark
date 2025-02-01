@@ -1,3 +1,4 @@
+from src.plugins.attacks.replacement.attack import ReplacementAttack
 from src.plugins.attacks.pitch_shift.attack import PitchShiftAttack
 from src.plugins.models.wavmark.model import WavMarkModel
 from src.plugins.models.silent_cipher.model import SilentCipherModel
@@ -8,7 +9,7 @@ from src.plugins.attacks.additive_noise.attack import AdditiveNoiseAttack
 
 model = AudioSealModel()
 
-attack = PitchShiftAttack()
+attack = ReplacementAttack()
 
 audio, sr = load_audio("test.wav")
 
