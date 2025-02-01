@@ -1,0 +1,10 @@
+{
+    "name": "WavMark",
+    "type": "model",
+    "variant": "docker",
+    "sampling_rate": 16000,
+    "watermark_size": 16,
+    "port": 8001,
+    "host": "0.0.0.0",
+    "endpoint": "http://localhost:8001"
+}

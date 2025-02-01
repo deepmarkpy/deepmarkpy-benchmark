@@ -1,6 +1,5 @@
 fastapi
 uvicorn
-numpy>=1.25.2,<2
-silentcipher
+wavmark
 librosa
 PyWavelets

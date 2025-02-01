@@ -3,20 +3,16 @@ from typing import List
 from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
-import silentcipher
+import wavmark
 import uvicorn
 import torch
-import logging
 
 from utils.utils import resample_audio
-
-logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-model = silentcipher.get_model(model_type='44.1k', device=device)
+model = wavmark.load_model().to(device)
 
 with open('config.json') as json_file:
     config = json.load(json_file)
@@ -39,13 +35,10 @@ async def embed(request: EmbedRequest):
     if sampling_rate != config["sampling_rate"]:
         audio = resample_audio(request.audio, sampling_rate, config["sampling_rate"])
 
-    watermark_data = np.split(watermark_data, len(watermark_data) // 8)
-    watermark_data = [int("".join(map(str, arr)), 2) for arr in watermark_data]
-    watermarked_audio, _ = model.encode_wav(audio, config["sampling_rate"], watermark_data)
-
+    watermarked_audio, _ = wavmark.encode_watermark(model, audio, watermark_data, show_progress=False)  
+    
     if sampling_rate != config["sampling_rate"]:
         watermarked_audio = resample_audio(watermarked_audio, config["sampling_rate"], sampling_rate)
-
     return {"watermarked_audio": watermarked_audio.tolist()}
 
 
@@ -54,20 +47,10 @@ async def detect(request: DetectRequest):
     """Detect a watermark from an audio file."""
     audio = np.array(request.audio)
     sampling_rate = request.sampling_rate
-
     if sampling_rate != config["sampling_rate"]:
-        audio = resample_audio(request.audio, sampling_rate, config["sampling_rate"])
-
-    message = model.decode_wav(audio, config["sampling_rate"], phase_shift_decoding=config["phase_shift_decoding"])
-    try:
-        message = message['messages'][0]
-        message = [np.array(list(f"{val:08b}"), dtype=np.int32) for val in message]
-        message = np.concatenate(message)
-        message = message.tolist()
-    except:  # noqa: E722
-        message = None
-    
-    return {"watermark": message}
+        audio = resample_audio(audio, sampling_rate, config["sampling_rate"])
+    message, _ = wavmark.decode_watermark(model, audio, show_progress=False)
+    return {"watermark": message if message is None else message.tolist()}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=config["port"])

@@ -96,7 +96,7 @@ class WatermarkingWrapper:
             watermarked_audio, _ = model.encode_wav(y, sr, watermark_data)
 
         if input_sr is not None and input_sr != sr:
-            watermarked_audio = resample_audio(watermarked_audio, input_sr, sr)
+            watermarked_audio = resample_audio(watermarked_audio, sr, input_sr)
         return watermarked_audio
 
     def detect(self, model_name, watermarked_audio, sampling_rate):

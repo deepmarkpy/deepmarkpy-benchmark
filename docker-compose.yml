@@ -12,3 +12,9 @@ services:
       dockerfile: src/plugins/models/silent_cipher/Dockerfile
     ports:
       - "7001:7001"
+  wavmark:
+    build:
+      context: .
+      dockerfile: src/plugins/models/wavmark/Dockerfile
+    ports:
+      - "8001:8001"

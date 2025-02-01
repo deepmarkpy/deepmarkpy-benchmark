@@ -67,7 +67,7 @@ async def detect(request: DetectRequest):
     watermarked_audio = torch.tensor(watermarked_audio, dtype=torch.float32)
     _, message = detector.detect_watermark(watermarked_audio, sampling_rate)
     message = message.squeeze().cpu().numpy()
-    return {"watermark": message.tolist()}
+    return {"watermark": message if message is None else message.tolist()}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=config["port"])
