@@ -9,10 +9,11 @@ from src.plugins.attacks.additive_noise.attack import AdditiveNoiseAttack
 from src.plugins.attacks.time_stretch.attack import TimeStretchAttack
 from src.plugins.attacks.inverted_time_stretch.attack import InvertedTimeStretch
 from src.plugins.attacks.zero_cross_inserts.attack import ZeroCrossInsertsAttack
+from src.plugins.attacks.cut_samples.attack import CutSamplesAttack
 
 model = AudioSealModel()
 
-attack = ZeroCrossInsertsAttack()
+attack = CutSamplesAttack()
 
 audio, sr = load_audio("test.wav")
 
