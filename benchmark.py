@@ -7,7 +7,7 @@ import pyrubberband as pyrb
 import torch
 from vaewmattacker import VAEWMAttacker
 import pywt
-from replacement_attack import replacement_attack
+from plugins.attacks.replacement.replacement_attack import replacement_attack
 
 
 class Benchmark:
