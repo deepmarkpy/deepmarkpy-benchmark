@@ -14,10 +14,10 @@ class CutSamplesAttack(BaseAttack):
             audio (np.ndarray): Input audio signal.
             **kwargs: Additional parameters.
                 - sampling_rate (int): Sampling rate of the audio in Hz (required).
-                - cut_max_sequence_length (int): Maximum length of each cut sequence. Default is 50 samples. (Optional).
-                - cut_num_sequences (int): Number of sequences to cut in the specified duration. Default is 20. (Optional).
-                - cut_duration (float): Duration (in seconds) over which cuts should occur. Default is 0.5 seconds. (Optional).
-                - cut_max_value_difference (float): Maximum allowed difference between start and end sample of a cut. Default is 0.1. (Optional).
+                - cut_max_sequence_length (int): Maximum length of each cut sequence. Default is 50 samples (Optional).
+                - cut_num_sequences (int): Number of sequences to cut in the specified duration. Default is 20 (Optional).
+                - cut_duration (float): Duration (in seconds) over which cuts should occur. Default is 0.5 seconds (Optional).
+                - cut_max_value_difference (float): Maximum allowed difference between start and end sample of a cut. Default is 0.1 (Optional).
 
         Returns:
             np.ndarray: Audio signal with random samples cut.
