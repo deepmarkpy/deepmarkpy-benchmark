@@ -7,10 +7,11 @@ from src.utils.utils import load_audio
 import numpy as np
 from src.plugins.attacks.additive_noise.attack import AdditiveNoiseAttack
 from src.plugins.attacks.time_stretch.attack import TimeStretchAttack
+from src.plugins.attacks.inverted_time_stretch.attack import InvertedTimeStretch
 
 model = AudioSealModel()
 
-attack = TimeStretchAttack()
+attack = InvertedTimeStretch()
 
 audio, sr = load_audio("test.wav")
 
@@ -23,7 +24,7 @@ watermark_data = np.random.randint(
 
 watermarked_audio = model.embed(audio, watermark_data, sr)
 
-watermarked_audio = attack.apply(watermarked_audio, cents=5, sampling_rate=sr, stretch_rate=2)
+watermarked_audio = attack.apply(watermarked_audio, cents=5, sampling_rate=sr, inverted_stretch_rate=2)
 
 watermark = model.detect(watermarked_audio, sr)
 

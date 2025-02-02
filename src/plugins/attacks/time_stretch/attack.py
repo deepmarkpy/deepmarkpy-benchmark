@@ -35,7 +35,7 @@ class TimeStretchAttack(BaseAttack):
 
         if sampling_rate is None:
             raise ValueError(
-                "Both 'sampling_rate' and 'stretch_rate' must be provided in kwargs."
+                "'sampling_rate' must be provided in kwargs."
             )
 
         return pyrb.time_stretch(audio, sampling_rate, stretch_rate)

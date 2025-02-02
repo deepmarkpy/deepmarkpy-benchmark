@@ -260,62 +260,6 @@ class Benchmark:
 
         return mixed_audio
 
-    def time_stretch(self, audio, **kwargs):
-        """
-        Perform time stretching on an audio signal using pyrubberband.
-
-        Args:
-            audio (np.ndarray): Input audio signal to be stretched.
-            **kwargs: Additional parameters for time stretching.
-                - sampling_rate (int): Sampling rate of the audio in Hz (required).
-                - stretch_rate (float): Stretching factor (>1 for slower, <1 for faster) (required).
-
-        Returns:
-            np.ndarray: The time-stretched audio signal.
-
-        Raises:
-            ValueError: If `sampling_rate` or `stretch_rate` is not provided in kwargs.
-
-        Notes:
-            - This function uses the pyrubberband library, which provides high-quality
-            time-stretching capabilities while maintaining pitch integrity.
-            - Ensure that pyrubberband and the Rubber Band Library are installed before use.
-            - Stretch rate of `1.0` implies no change in speed.
-            - Values greater than `1.0` slow down the audio, while values less than `1.0` speed it up.
-        """
-        sampling_rate = kwargs.get("sampling_rate", None)
-        stretch_rate = kwargs.get("stretch_rate", None)
-
-        if sampling_rate is None or stretch_rate is None:
-            raise ValueError(
-                "Both 'sampling_rate' and 'stretch_rate' must be provided in kwargs."
-            )
-
-        return pyrb.time_stretch(audio, sampling_rate, stretch_rate)
-
-    def inverted_time_stretch(self, audio, **kwargs):
-        """
-        Perform an inverted time stretch operation.
-
-        Args:
-            audio (np.ndarray): Input audio signal.
-            **kwargs: Additional parameters for time stretching.
-                - inverted_stretch_rate (float): Stretching factor (>1 for slower, <1 for faster). Required.
-
-        Returns:
-            np.ndarray: The audio signal after time stretching and inverting.
-
-        Raises:
-            ValueError: If 'inverted_stretch_rate' is not provided in kwargs.
-        """
-        args = kwargs.copy()
-        stretch_rate = args.get("inverted_stretch_rate")
-        args.pop("stretch_rate")
-        if stretch_rate is None:
-            raise ValueError("'inverted_stretch_rate' must be provided in kwargs.")
-        audio = self.time_stretch(audio, stretch_rate=stretch_rate, **args)
-        return self.time_stretch(audio, stretch_rate=1 / stretch_rate, **args)
-
     def zero_cross_inserts(self, audio, **kwargs):
         """
         Perform Zero-Cross-Inserts on an audio signal.
