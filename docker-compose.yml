@@ -24,3 +24,10 @@ services:
       dockerfile: src/plugins/attacks/vae/Dockerfile
     ports:
       - "10001:10001"
+
+  diffusion:
+    build:
+      context: .
+      dockerfile: src/plugins/attacks/diffusion/Dockerfile
+    ports:
+      - "10002:10002"

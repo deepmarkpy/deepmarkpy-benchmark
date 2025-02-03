@@ -15,9 +15,11 @@ from src.plugins.attacks.wavelet.attack import WaveletAttack
 
 from src.plugins.attacks.vae.attack import VAEAttack
 
+from src.plugins.attacks.diffusion.attack import DiffusionAttack
+
 model = AudioSealModel()
 
-attack = WaveletAttack()
+attack = DiffusionAttack()
 
 audio, sr = load_audio("test.wav")
 
