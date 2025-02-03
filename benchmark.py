@@ -260,30 +260,7 @@ class Benchmark:
 
         return mixed_audio
 
-    def wavelet_denoise(self, audio, **kwargs):
-        """
-        Perform wavelet-based denoising on an audio signal.
 
-        Args:
-            audio (np.ndarray): Input audio signal.
-            **kwargs: Additional parameters for the wavelet denoising.
-                - wavelet (str): Wavelet type (e.g., 'db1', 'sym5'). Default is 'db1'.
-                - wt_mode (str): Thresholding mode ('soft' or 'hard'). Default is 'soft'.
-
-        Returns:
-            np.ndarray: The denoised audio signal.
-        """
-        wavelet = kwargs.get("wavelet", "db1")
-        mode = kwargs.get("wt_mode", "soft")
-
-        threshold = compute_threshold(audio, wavelet)
-
-        coeffs = pywt.wavedec(audio, wavelet)
-        coeffs_denoised = [pywt.threshold(c, threshold, mode=mode) for c in coeffs]
-
-        denoised_audio = pywt.waverec(coeffs_denoised, wavelet)
-
-        return denoised_audio
     
     def ddim_attack(self, audio, **kwargs):
         attacker = AudioDDIMAttacker()

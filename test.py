@@ -11,12 +11,13 @@ from src.plugins.attacks.inverted_time_stretch.attack import InvertedTimeStretch
 from src.plugins.attacks.zero_cross_inserts.attack import ZeroCrossInsertsAttack
 from src.plugins.attacks.cut_samples.attack import CutSamplesAttack
 from src.plugins.attacks.flip_samples.attack import FlipSamplesAttack
+from src.plugins.attacks.wavelet.attack import WaveletAttack
 
 from src.plugins.attacks.vae.attack import VAEAttack
 
 model = AudioSealModel()
 
-attack = VAEAttack()
+attack = WaveletAttack()
 
 audio, sr = load_audio("test.wav")
 
