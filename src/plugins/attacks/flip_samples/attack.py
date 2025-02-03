@@ -1,10 +1,10 @@
-
 from src.core.base_attack import BaseAttack
 
 import numpy as np
 
+
 class FlipSamplesAttack(BaseAttack):
-    def apply(self, audio: np.ndarray, **kwargs) ->np.ndarray:
+    def apply(self, audio: np.ndarray, **kwargs) -> np.ndarray:
         """
         Perform a "Flip Samples" attack by randomly exchanging the positions
         of selected samples in the audio signal.

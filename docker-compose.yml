@@ -18,3 +18,9 @@ services:
       dockerfile: src/plugins/models/wavmark/Dockerfile
     ports:
       - "8001:8001"
+  vae:
+    build:
+      context: .
+      dockerfile: src/plugins/attacks/vae/Dockerfile
+    ports:
+      - "10001:10001"

@@ -2,4 +2,3 @@ fastapi
 uvicorn
 audioseal
 librosa
-PyWavelets

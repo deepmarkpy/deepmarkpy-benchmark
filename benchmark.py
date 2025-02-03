@@ -284,42 +284,6 @@ class Benchmark:
         denoised_audio = pywt.waverec(coeffs_denoised, wavelet)
 
         return denoised_audio
-
-    def vae_wm_attack(self, audio, **kwargs):
-        """
-        Applies a VAE-based watermarking attack on the given audio signal.
-        
-        Args:
-            audio (np.ndarray): The input audio signal.
-            **kwargs: Additional parameters.
-                - sampling_rate (int): The original sampling rate of the audio (required).
-
-        Returns:
-            np.ndarray: The attacked audio signal.
-
-        Raises:
-            ValueError: If 'sampling_rate' is not provided in kwargs.
-        """
-        sampling_rate = kwargs.get("sampling_rate", None)
-        if sampling_rate is None:
-            raise ValueError("'sampling_rate' must be provided in kwargs.")
-        audio = np.squeeze(audio)
-
-        block_size = 2048
-        original_length = len(audio)
-        new_length = (original_length // block_size) * block_size
-        audio = audio[:new_length]
-
-        audio = resample_audio(audio, sampling_rate, target_sr=48000)
-
-        waveform_tensor = torch.from_numpy(audio).float()
-
-        model = 'voice_vctk_b2048_r44100_z22.ts'
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        attacker = VAEWMAttacker(model=model, device=device)
-        attacked = attacker.attack(waveform_tensor)
-
-        return attacked
     
     def ddim_attack(self, audio, **kwargs):
         attacker = AudioDDIMAttacker()
