@@ -38,6 +38,14 @@ class BaseModel(abc.ABC):
         """
         pass
 
+    def generate_watermark(self) -> np.ndarray:
+        """
+        Generate sample watermark.
+        """
+        return np.random.randint(
+            0, 2, size=self.config["watermark_size"], dtype=np.int32
+        )
+
     @property
     def name(self) -> str:
         return self.__class__.__name__

@@ -19,10 +19,11 @@ class BaseAttack(abc.ABC):
         self.config_path = os.path.join(model_dir, "config.json")
 
         if not os.path.exists(self.config_path):
-            raise FileNotFoundError(f"config.json not found in {self.config_path}")
-
-        with open(self.config_path, "r") as json_file:
-            self._config = json.load(json_file)
+            print(f"config.json not found in {self.config_path}")
+            self._config = None
+        else:
+            with open(self.config_path, "r") as json_file:
+                self._config = json.load(json_file)
 
     @abc.abstractmethod
     def apply(self, audio: np.ndarray, **kwargs) -> np.ndarray:

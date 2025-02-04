@@ -113,68 +113,6 @@ class Benchmark:
 
         return results
 
-    def compute_mean_accuracy(self, results):
-        """
-        Compute the mean accuracy for each attack across all files.
-
-        Args:
-            results (dict): Dictionary where each key is a filepath, and the value is another dictionary
-                            containing attack results with accuracy and other metrics.
-
-        Returns:
-            dict: A dictionary with attacks as keys and their mean accuracy as values.
-        """
-        attack_accuracies = {}
-
-        for _, attacks in results.items():
-            for attack, metrics in attacks.items():
-                if attack not in attack_accuracies:
-                    attack_accuracies[attack] = []
-
-                attack_accuracies[attack].append(metrics["accuracy"])
-
-        mean_accuracies = {
-            attack: np.mean(accuracies)
-            for attack, accuracies in attack_accuracies.items()
-        }
-
-        return mean_accuracies
-
-    def compare_watermarks(self, original, detected):
-        """
-        Compare the original and detected watermarks.
-
-        Args:
-            original (np.ndarray): The original binary watermark.
-            detected (np.ndarray): The detected binary watermark.
-
-        Returns:
-            float: The accuracy of the detected watermark (percentage).
-        """
-        matches = np.sum(original == detected)
-        return matches / len(original) * 100
-
-    def same_model_watermarking(self, audio, **kwargs):
-        """
-        Perform multiple watermarking using the same model repeatedly.
-
-        Args:
-            audio (np.ndarray): The input audio signal to watermark.
-            **kwargs: Additional parameters for the watermarking process.
-                - model_name (str): The name of the watermarking model to use.
-                - sampling_rate (int): The sampling rate of the audio signal.
-
-        Returns:
-            np.ndarray: The watermarked audio signal.
-        """
-        model_name = kwargs.get("model_name", None)
-        input_sr = kwargs.get("sampling_rate", None)
-
-        if model_name is None:
-            raise ValueError("A model name must be specified for same_model_watermarking.")
-
-        return self.wrapper.embed(model_name, audio, input_sr=input_sr)
-
 
     def cross_model_watermarking(self, audio, **kwargs):
         """

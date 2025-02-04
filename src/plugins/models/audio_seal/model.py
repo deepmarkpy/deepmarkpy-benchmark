@@ -24,3 +24,5 @@ class AudioSealModel(BaseModel):
             json={"audio": audio.tolist(), "sampling_rate": sampling_rate},
         )
         return np.array(response.json()["watermark"])
+        
+ 

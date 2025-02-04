@@ -3,11 +3,13 @@ from benchmark import Benchmark
 benchmark = Benchmark()
 
 
-attacks = ['AdditiveNoiseAttack', 'VAEAttack']
+attacks = ['CrossModelAttack']
 
 model_name = 'AudioSealModel'
 
 filepaths = ['test.wav']
+
+benchmark.show_available_plugins()
 
 results = benchmark.run(model_name=model_name, attack_types=attacks, filepaths=filepaths)
 

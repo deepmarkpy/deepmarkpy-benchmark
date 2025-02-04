@@ -114,9 +114,10 @@ class Benchmark:
 
         attack_kwargs = {
             **kwargs,
-            "model_name": model_name,
+            "model": model_instance,
             "watermark_data": watermark_data,
             "sampling_rate": sampling_rate,
+            "models": self.models
         }
 
         for filepath in filepaths:
@@ -126,10 +127,9 @@ class Benchmark:
 
             # If no user-supplied watermark, pick a random message size
             if watermark_data is None:
-                message_size = 40 if model_name == "SilentCipher" else 16
-                watermark_data = np.random.randint(
-                    0, 2, size=message_size, dtype=np.int32
-                )
+                watermark_data = model_instance.generate_watermark()
+                attack_kwargs["watermark_data"] = model_instance.generate_watermark()
+
 
             # Load audio
             audio, sampling_rate = load_audio(filepath, target_sr=sampling_rate)
