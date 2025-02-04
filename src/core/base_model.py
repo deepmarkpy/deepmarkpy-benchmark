@@ -2,6 +2,7 @@ import abc
 import json
 import numpy as np
 import os
+import inspect
 
 
 class BaseModel(abc.ABC):
@@ -9,10 +10,10 @@ class BaseModel(abc.ABC):
     Abstract base class for a Watermarking model.
     """
 
-
     def __init__(self):
-        model_file = os.path.abspath(self.__class__.__module__.replace(".", "/") + ".py")
-        model_dir = os.path.dirname(model_file)
+        model_file = inspect.getfile(self.__class__)
+        model_dir = os.path.dirname(os.path.abspath(model_file))
+
         self.config_path = os.path.join(model_dir, "config.json")
 
         if not os.path.exists(self.config_path):
@@ -20,9 +21,11 @@ class BaseModel(abc.ABC):
 
         with open(self.config_path, "r") as json_file:
             self._config = json.load(json_file)
-    
+
     @abc.abstractmethod
-    def embed(self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int) -> np.ndarray:
+    def embed(
+        self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int
+    ) -> np.ndarray:
         """
         Embed a watermark into the audio. Return watermarked audio.
         """
@@ -38,9 +41,8 @@ class BaseModel(abc.ABC):
     @property
     def name(self) -> str:
         return self.__class__.__name__
-    
+
     @property
     def config(self) -> dict:
         """Provides read-only access to the attack configuration."""
         return self._config
-    

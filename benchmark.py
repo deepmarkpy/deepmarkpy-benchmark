@@ -1,13 +1,8 @@
 import numpy as np
-from audio_diffusion_attacks import AudioDDIMAttacker
-from utils import compute_threshold, load_audio, resample_audio, snr
-from watermarking_wrapper import WatermarkingWrapper
 import random
 import pyrubberband as pyrb
-import torch
-from vaewmattacker import VAEWMAttacker
-import pywt
 from plugins.attacks.replacement.replacement_attack import replacement_attack
+from utils.utils import load_audio, snr
 
 
 class Benchmark:
@@ -259,12 +254,3 @@ class Benchmark:
                 mixed_audio[remaining_start:] = second_audio[remaining_start:]
 
         return mixed_audio
-
-
-    
-    def ddim_attack(self, audio, **kwargs):
-        attacker = AudioDDIMAttacker()
-        sampling_rate = kwargs.get("sampling_rate", None)
-        if sampling_rate is None:
-            raise ValueError("'sampling_rate' must be provided in kwargs.")
-        return attacker.attack(audio, sampling_rate)

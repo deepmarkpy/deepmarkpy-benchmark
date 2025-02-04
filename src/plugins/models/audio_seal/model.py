@@ -1,5 +1,5 @@
 import requests
-from src.core.base_model import BaseModel
+from core.base_model import BaseModel
 import numpy as np
 
 

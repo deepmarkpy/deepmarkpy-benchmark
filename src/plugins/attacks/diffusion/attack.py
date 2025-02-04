@@ -1,4 +1,4 @@
-from src.core.base_attack import BaseAttack
+from core.base_attack import BaseAttack
 
 import requests
 import numpy as np

@@ -1,6 +1,6 @@
 import numpy as np
-from src.core.base_attack import BaseAttack
-from src.plugins.attacks.replacement.replacement_attack import replacement_attack
+from core.base_attack import BaseAttack
+from plugins.attacks.replacement.replacement_attack import replacement_attack
 
 
 class ReplacementAttack(BaseAttack):

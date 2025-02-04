@@ -50,12 +50,8 @@ print(np.max(watermarked_audio), np.min(watermarked_audio))
 
 sf.write("output.wav", watermarked_audio, sr)
 
-# if np.issubdtype(watermarked_audio.dtype, np.floating):
-#         y = np.int16(watermarked_audio / np.max(np.abs(watermarked_audio)) * 32767)
-
-# write("output_ddim.wav", sr, y)
-
 watermark = model.detect(watermarked_audio, sr)
+
 
 print(watermark)
 

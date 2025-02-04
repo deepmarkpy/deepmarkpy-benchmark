@@ -1,7 +1,7 @@
 import pywt
 import numpy as np
 
-from src.core.base_attack import BaseAttack
+from core.base_attack import BaseAttack
 
 
 class WaveletAttack(BaseAttack):

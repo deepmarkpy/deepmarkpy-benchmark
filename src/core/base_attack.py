@@ -2,6 +2,8 @@ import abc
 import json
 import numpy as np
 import os
+import inspect
+
 
 class BaseAttack(abc.ABC):
     """
@@ -11,9 +13,10 @@ class BaseAttack(abc.ABC):
     """
 
     def __init__(self):
-        attack_file = os.path.abspath(self.__class__.__module__.replace(".", "/") + ".py")
-        attack_dir = os.path.dirname(attack_file)
-        self.config_path = os.path.join(attack_dir, "config.json")
+        model_file = inspect.getfile(self.__class__)
+        model_dir = os.path.dirname(os.path.abspath(model_file))
+
+        self.config_path = os.path.join(model_dir, "config.json")
 
         if not os.path.exists(self.config_path):
             raise FileNotFoundError(f"config.json not found in {self.config_path}")
@@ -33,7 +36,7 @@ class BaseAttack(abc.ABC):
     def name(self) -> str:
         """Return a short identifier name for this attacker."""
         return self.__class__.__name__
-    
+
     @property
     def config(self) -> dict:
         """Provides read-only access to the attack configuration."""
