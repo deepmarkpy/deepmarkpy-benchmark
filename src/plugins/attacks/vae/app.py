@@ -51,9 +51,9 @@ async def attack(request: AttackRequest):
 
     audio = resample_audio(audio, sampling_rate, target_sr=48000)
 
-    waveform_tensor = torch.from_numpy(audio).float()
+    audio = model.inference(audio)
 
-    audio = model.inference(waveform_tensor)
+    audio = resample_audio(audio, 48000, sampling_rate)
 
     return {"audio": audio.tolist()}
 

@@ -68,3 +68,28 @@ def resample_audio(audio, input_sr, target_sr):
         audio = resample_poly(audio, up, down)
     
     return audio
+
+def renormalize_audio(original_audio: np.ndarray, processed_audio: np.ndarray) -> np.ndarray:
+    """
+    Renormalizes processed_audio to match the min and max range of original_audio.
+
+    Args:
+        original_audio (np.ndarray): The original input audio signal.
+        processed_audio (np.ndarray): The model output (quieter audio).
+
+    Returns:
+        np.ndarray: The renormalized audio.
+    """
+    # Get min and max of the original and processed audio
+    orig_min, orig_max = original_audio.min(), original_audio.max()
+    proc_min, proc_max = processed_audio.min(), processed_audio.max()
+
+    # Avoid division by zero if processed audio is silent
+    if proc_max - proc_min == 0:
+        return processed_audio  # Return as-is if it's completely silent
+    
+    # Scale processed audio to match original range
+    renormalized_audio = (processed_audio - proc_min) / (proc_max - proc_min)  # Normalize to [0, 1]
+    renormalized_audio = renormalized_audio * (orig_max - orig_min) + orig_min  # Scale to original range
+    
+    return renormalized_audio

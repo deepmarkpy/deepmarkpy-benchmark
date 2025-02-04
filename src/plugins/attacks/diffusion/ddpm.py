@@ -1,6 +1,6 @@
 from diffusers import DiffusionPipeline
 import torch
-from utils.utils import resample_audio
+from utils.utils import resample_audio, renormalize_audio
 
 import numpy as np
 
@@ -17,6 +17,8 @@ class DDPM:
         mel = self.model.mel
         mel_sample_rate = mel.get_sample_rate()
         slice_size = mel.x_res * mel.hop_length
+
+        orig_min, orig_max = np.max(audio), np.min(audio)
 
         audio = resample_audio(audio, sampling_rate, mel_sample_rate)
 
@@ -54,4 +56,5 @@ class DDPM:
                     [output, new_audio_slice[overlap_samples * not_first :]]
                 )
                 not_first = 1
-        return resample_audio(output, mel_sample_rate, sampling_rate)
+        output = resample_audio(output, mel_sample_rate, sampling_rate)
+        return renormalize_audio(audio, output)

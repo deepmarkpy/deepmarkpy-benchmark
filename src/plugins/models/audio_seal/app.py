@@ -52,7 +52,7 @@ async def embed(request: EmbedRequest):
     watermarked_audio = np.squeeze(watermarked_audio)
 
     if sampling_rate != config["sampling_rate"]:
-        watermarked_audio = resample_audio(watermarked_audio, sampling_rate, config["sampling_rate"])
+        watermarked_audio = resample_audio(watermarked_audio, config["sampling_rate"], sampling_rate)
 
     return {"watermarked_audio": watermarked_audio.tolist()}
 

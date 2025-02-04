@@ -2,6 +2,7 @@ import os
 import torch
 from huggingface_hub import hf_hub_download
 import shutil
+from utils.utils import renormalize_audio
 
 class VAE():
     def __init__(self, model_name, device):
@@ -26,7 +27,8 @@ class VAE():
         self.model = torch.jit.load(model_path).eval().to(device)
         self.device = device
 
-    def inference(self, waveform):
+    def inference(self, audio):
+        waveform = torch.from_numpy(audio).float()
         waveform = waveform.to(self.device)
         if waveform.dim() == 1:
             waveform = waveform.unsqueeze(0)
@@ -35,6 +37,7 @@ class VAE():
 
         with torch.no_grad():
             reconstructed = self.model.forward(waveform.unsqueeze(0))
-        reconstructed = reconstructed.squeeze().clamp(-1, 1)
+        reconstructed = reconstructed.squeeze()
 
-        return reconstructed.cpu().numpy()
+        reconstructed = reconstructed.cpu().numpy()
+        return renormalize_audio(audio, reconstructed)

@@ -21,9 +21,6 @@ class AudioSealModel(BaseModel):
     def detect(self, audio: np.ndarray, sampling_rate: int) -> np.ndarray:
         response = requests.post(
             self.config["endpoint"] + "/detect",
-            json={
-                "audio": audio.tolist(),
-                "sampling_rate": sampling_rate
-            }
+            json={"audio": audio.tolist(), "sampling_rate": sampling_rate},
         )
         return np.array(response.json()["watermark"])
