@@ -3,7 +3,7 @@ from benchmark import Benchmark
 benchmark = Benchmark()
 
 
-attacks = ['CrossModelAttack']
+attacks = ['SameModelAttack']
 
 model_name = 'AudioSealModel'
 

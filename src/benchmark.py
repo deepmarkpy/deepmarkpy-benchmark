@@ -133,6 +133,7 @@ class Benchmark:
 
             # Load audio
             audio, sampling_rate = load_audio(filepath, target_sr=sampling_rate)
+            attack_kwargs["orig_audio"] = audio
 
             # Embed watermark
             watermarked_audio = model_instance.embed(
