@@ -6,31 +6,31 @@ from fastapi import FastAPI
 import uvicorn
 import json
 
-from big_vgan import BigVGAN
+from speech_brain import SpeechBrain
 
 app = FastAPI()
 
 with open("config.json") as json_file:
     config = json.load(json_file)
 
-model_name = config["model_name"]
+type = config["type"]
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-model = BigVGAN(model_name, device)
+model = SpeechBrain(type)
 
 
 class AttackRequest(BaseModel):
     audio: List[float]
     sampling_rate: int
+    noise_strength: float
 
 
 @app.post("/attack")
 async def attack(request: AttackRequest):
     sampling_rate = request.sampling_rate
     audio = np.array(request.audio)
+    noise_strength = request.noise_strength
 
-    audio = model.inference(audio, sampling_rate)
+    audio = model.inference(audio, sampling_rate, noise_strength)
 
     return {"audio": audio.tolist()}
 

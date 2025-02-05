@@ -44,3 +44,10 @@ services:
       dockerfile: src/plugins/attacks/neural_vocoder/Dockerfile
     ports:
       - "10004:10004"
+
+  speech_enhancement:
+    build:
+      context: .
+      dockerfile: src/plugins/attacks/speech_enhancement/Dockerfile
+    ports:
+      - "10005:10005"

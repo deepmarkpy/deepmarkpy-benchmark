@@ -4,9 +4,9 @@ import json
 benchmark = Benchmark()
 
 
-attacks = ['NeuralVocoderAttack']
+attacks = ['SpeechEnhancementAttack']
 
-model_name = 'AudioSealModel'
+model_name = 'WavMarkModel'
 
 filepaths = ['test.wav']
 

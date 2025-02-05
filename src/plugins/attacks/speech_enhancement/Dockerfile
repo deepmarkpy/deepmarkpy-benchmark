@@ -3,7 +3,7 @@ FROM python:3.11-slim-buster AS builder
 WORKDIR /app
 
 # Install dependencies in a temporary layer
-COPY /src/plugins/attacks/diffusion/requirements.txt .
+COPY /src/plugins/attacks/speech_enhancement/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Final image
@@ -15,15 +15,20 @@ WORKDIR /app
 COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libsndfile1 \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install system dependencies
 RUN apt-get update
 
 COPY src/utils ./utils
 
-COPY src/plugins/attacks/diffusion .
+COPY src/plugins/attacks/speech_enhancement .
 
 # Expose the service port
-EXPOSE 10002
+EXPOSE 10005
 
 # Run the FastAPI server using Uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "10002"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "10005"]

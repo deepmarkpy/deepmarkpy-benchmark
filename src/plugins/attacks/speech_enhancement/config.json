@@ -1,0 +1,7 @@
+{
+    "endpoint": "http://localhost:10005",
+    "type": "waveform",
+    "noise_strength": 0.01,
+    "port": 10005,
+    "sampling_rate": 16000
+}
