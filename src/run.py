@@ -3,7 +3,7 @@ from benchmark import Benchmark
 benchmark = Benchmark()
 
 
-attacks = ['SameModelAttack']
+attacks = ['SpeechTokenizationAttack']
 
 model_name = 'AudioSealModel'
 

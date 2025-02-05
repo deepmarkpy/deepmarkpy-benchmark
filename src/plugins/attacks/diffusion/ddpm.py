@@ -18,8 +18,6 @@ class DDPM:
         mel_sample_rate = mel.get_sample_rate()
         slice_size = mel.x_res * mel.hop_length
 
-        orig_min, orig_max = np.max(audio), np.min(audio)
-
         audio = resample_audio(audio, sampling_rate, mel_sample_rate)
 
         overlap_secs = 2

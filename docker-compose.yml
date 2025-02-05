@@ -31,3 +31,10 @@ services:
       dockerfile: src/plugins/attacks/diffusion/Dockerfile
     ports:
       - "10002:10002"
+  
+  speech_tokenization:
+    build:
+      context: .
+      dockerfile: src/plugins/attacks/speech_tokenization/Dockerfile
+    ports:
+      - "10003:10003"
