@@ -4,7 +4,7 @@ import json
 benchmark = Benchmark()
 
 
-attacks = ['AdditiveNoiseAttack']
+attacks = ['NeuralVocoderAttack']
 
 model_name = 'AudioSealModel'
 

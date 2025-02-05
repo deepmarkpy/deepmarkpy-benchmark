@@ -1,0 +1,5 @@
+{
+    "endpoint": "http://localhost:10004",
+    "model_name": "nvidia/bigvgan_v2_44khz_128band_512x",
+    "port": 10004
+}
