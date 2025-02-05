@@ -2,7 +2,7 @@ import numpy as np
 import librosa
 from tqdm import tqdm
 
-from psychoacoustic_model import PsychoacousticModel
+from plugins.attacks.replacement.psychoacoustic_model import PsychoacousticModel
 
 
 def signal_analysis(x, block_size, hop_size):

@@ -1,6 +1,5 @@
 import librosa
 import numpy as np
-import pywt
 from scipy.signal import resample_poly
 
 def load_audio(file_path, target_sr=None, mono=True):
@@ -50,36 +49,6 @@ def snr(signal, noisy_signal):
 
     return snr
 
-def compute_threshold(audio, wavelet):
-    """
-    Compute the universal threshold for wavelet-based denoising.
-
-    Args:
-        audio (np.ndarray): Input audio signal.
-        wavelet (str): Wavelet type (e.g., 'db1', 'sym5', etc.) used for decomposition.
-
-    Returns:
-        float: The calculated threshold value.
-
-    Notes:
-        - This function uses the universal threshold formula:
-          Threshold = sigma * sqrt(2 * log(n)),
-          where sigma is the noise standard deviation estimated from the detail coefficients,
-          and n is the length of the audio signal.
-        - The estimation of sigma uses the robust formula:
-          sigma = median(|coeffs[-1]|) / 0.6745,
-          which is based on the assumption of Gaussian white noise.
-        - The universal threshold is particularly effective for denoising signals corrupted by
-          additive white Gaussian noise.
-
-    """
-    coeffs = pywt.wavedec(audio, wavelet)
-    sigma = np.median(np.abs(coeffs[-1])) / 0.6745
-    threshold = sigma * np.sqrt(2 * np.log(len(audio)))
-    return threshold
-
-
-
 def resample_audio(audio, input_sr, target_sr):
     """
     Resamples an audio signal from input_sr to target_sr using polyphase filtering.
@@ -99,3 +68,28 @@ def resample_audio(audio, input_sr, target_sr):
         audio = resample_poly(audio, up, down)
     
     return audio
+
+def renormalize_audio(original_audio: np.ndarray, processed_audio: np.ndarray) -> np.ndarray:
+    """
+    Renormalizes processed_audio to match the min and max range of original_audio.
+
+    Args:
+        original_audio (np.ndarray): The original input audio signal.
+        processed_audio (np.ndarray): The model output (quieter audio).
+
+    Returns:
+        np.ndarray: The renormalized audio.
+    """
+    # Get min and max of the original and processed audio
+    orig_min, orig_max = original_audio.min(), original_audio.max()
+    proc_min, proc_max = processed_audio.min(), processed_audio.max()
+
+    # Avoid division by zero if processed audio is silent
+    if proc_max - proc_min == 0:
+        return processed_audio  # Return as-is if it's completely silent
+    
+    # Scale processed audio to match original range
+    renormalized_audio = (processed_audio - proc_min) / (proc_max - proc_min)  # Normalize to [0, 1]
+    renormalized_audio = renormalized_audio * (orig_max - orig_min) + orig_min  # Scale to original range
+    
+    return renormalized_audio

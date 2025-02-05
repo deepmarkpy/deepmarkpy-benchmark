@@ -1,0 +1,7 @@
+{
+    "cut_max_sequence_length": 20,
+    "cut_num_sequences": 20,
+    "cut_duration": 0.5,
+    "cut_max_value_difference": 0.1
+
+}

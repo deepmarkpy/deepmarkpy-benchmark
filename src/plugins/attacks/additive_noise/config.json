@@ -1,0 +1,5 @@
+{
+    "name": "AdditiveNoise",
+    "type": "basic",
+    "noise_level": 0.003
+}
