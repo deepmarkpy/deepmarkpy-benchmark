@@ -2,7 +2,6 @@ import numpy as np
 import inspect
 from utils.utils import load_audio, snr
 from plugin_manager import PluginManager
-import json
 
 
 class Benchmark:
@@ -176,7 +175,7 @@ class Benchmark:
                     "snr": snr_val,
                 }
 
-        return json.dumps(results, indent=2)
+        return results
 
     def compute_mean_accuracy(self, results):
         """

@@ -1,9 +1,10 @@
 from benchmark import Benchmark
+import json
 
 benchmark = Benchmark()
 
 
-attacks = ['SpeechTokenizationAttack']
+attacks = ['AdditiveNoiseAttack']
 
 model_name = 'AudioSealModel'
 
@@ -13,4 +14,7 @@ benchmark.show_available_plugins()
 
 results = benchmark.run(model_name=model_name, attack_types=attacks, filepaths=filepaths)
 
-print(results)
+mean = benchmark.compute_mean_accuracy(results)
+
+print(json.dumps(results, indent=2))
+print(json.dumps(mean, indent=2))
