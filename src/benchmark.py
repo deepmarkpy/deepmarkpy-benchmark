@@ -18,6 +18,19 @@ class Benchmark:
         self.attacks = self.plugin_manager.get_attacks()
         self.models = self.plugin_manager.get_models()
 
+    def get_available_args(self):
+        valid_args = {}
+        attacks = []
+        models = self.models.keys()
+        attacks = self.attacks.keys()
+        for attack in attacks:
+            config = self.attacks[attack]["config"]
+            if config is not None:
+                for key, value in config.items():
+                    valid_args[key] = value
+        return list(models), list(attacks), valid_args
+
+
     def show_available_plugins(self):
         """
         Print out all discovered models and attacks, including any __init__ parameters
@@ -76,7 +89,7 @@ class Benchmark:
         model_name,
         watermark_data=None,
         attack_types=None,
-        sampling_rate=16000,
+        sampling_rate=None,
         verbose=True,
         **kwargs,
     ):
@@ -88,7 +101,7 @@ class Benchmark:
             model_name (str): The model to benchmark (e.g., 'AudioSeal', 'WavMark', 'SilentCipher').
             watermark_data (np.ndarray, optional): The binary watermark data to embed. Defaults to random message.
             attack_types (list, optional): A list of attack types to perform. Defaults to all available attacks.
-            sampling_rate (int, optional): Target sampling rate for loading audio. Defaults to 16000.
+            sampling_rate (int, optional): Target sampling rate for loading audio. Defaults to None.
             verbose (bool, optional): Print verbose info. Defaults to True.
             **kwargs: Additional parameters for specific attacks.
 
@@ -110,6 +123,9 @@ class Benchmark:
 
         model_cls = self.models[model_name]["class"]
         model_instance = model_cls()
+
+        if sampling_rate is None:
+            sampling_rate=self.models[model_name]["config"]["sampling_rate"]
 
         attack_kwargs = {
             **kwargs,
