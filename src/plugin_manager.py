@@ -4,7 +4,6 @@ import importlib
 import inspect
 import json
 
-# Adjust these imports to point to your actual base classes
 from core.base_attack import BaseAttack
 from core.base_model import BaseModel
 
@@ -61,7 +60,7 @@ class PluginManager:
 
     def _load_classes_from_directory(self, directory, base_class, storage_dict, package_prefix):
         for root, _, files in os.walk(directory):
-            # Load config.json if present (same as before)
+            # Load config.json if present
             config_path = os.path.join(root, "config.json")
             config_data = None
             if os.path.exists(config_path):
