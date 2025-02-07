@@ -1,6 +1,5 @@
 import argparse
 import json
-import sys
 import os
 from benchmark import Benchmark
 
