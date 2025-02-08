@@ -150,7 +150,7 @@ def replacement_attack(
     overlap_factor=0.75,
     lower_bound=0,
     upper_bound=10,
-    k=100,
+    k=30,
     use_masking=False,
 ):
     """
@@ -169,7 +169,7 @@ def replacement_attack(
         overlap_factor (float): Overlap factor between consecutive blocks (default: 0.75).
         lower_bound (float): The lower bound of the similarity distance for considering a block as a candidate.
         upper_bound (float): The upper bound of the similarity distance for considering a block as a candidate.
-        k (int): Maximum number of similar blocks to consider (default: 20).
+        k (int): Maximum number of similar blocks to consider (default: 30).
         use_masking (bool): Whether to use psychoacoustic masking for distance calculation (default: True).
 
     Returns:
