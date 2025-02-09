@@ -14,8 +14,8 @@ def main():
 
     # Add model and attack selection
     parser.add_argument("--wav_files_dir", type=str, help="Path to the directory containing .wav files.", required=True)
-    parser.add_argument("--model", type=str, choices=models, required=True, help="Watermarking model to use.")
-    parser.add_argument("--attacks", type=str, nargs='*', choices=attacks, default=None, metavar="ATTACK", help="List of attacks to apply. Allowed values: " + ", ".join(attacks))
+    parser.add_argument("--wm_model", type=str, choices=models, required=True, help="Watermarking model to use.")
+    parser.add_argument("--attack_types", type=str, nargs='*', choices=attacks, default=None, metavar="ATTACK", help="List of attacks to apply. Allowed values: " + ", ".join(attacks))
     
     # Dynamically add configuration parameters from the available plugins
     for arg, default_value in valid_args.items():
@@ -35,8 +35,6 @@ def main():
     # Run the benchmark
     results = benchmark.run(
         filepaths=filepaths,
-        models=args.models,
-        attacks=args.attacks,
         **args_dict
     )
     

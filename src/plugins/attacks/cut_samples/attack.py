@@ -4,11 +4,10 @@ import numpy as np
 
 
 class CutSamplesAttack(BaseAttack):
-
     def apply(self, audio: np.ndarray, **kwargs) -> np.ndarray:
         """
         Perform a "Cut Samples" attack by randomly deleting short sequences of samples
-        while maintaining inaudibility constraints.
+        within a randomly chosen segment of the audio.
 
         Args:
             audio (np.ndarray): Input audio signal.
@@ -40,16 +39,22 @@ class CutSamplesAttack(BaseAttack):
         if sampling_rate is None:
             raise ValueError("'sampling_rate' must be provided in kwargs.")
 
-        total_samples = int(duration * sampling_rate)
+        total_samples = len(audio)
+        segment_samples = int(duration * sampling_rate)
 
-        total_samples = min(total_samples, len(audio))
+        if segment_samples >= total_samples:
+            start_offset = 0
+        else:
+            start_offset = np.random.randint(0, total_samples - segment_samples)
+
+        end_offset = start_offset + segment_samples
+        segment_audio = audio[start_offset:end_offset]
 
         cut_positions = np.random.choice(
-            range(total_samples - max_sequence_length),
+            range(len(segment_audio) - max_sequence_length),
             size=num_sequences,
             replace=False,
         )
-
         cut_positions = np.sort(cut_positions)
 
         modified_audio = []
@@ -59,16 +64,18 @@ class CutSamplesAttack(BaseAttack):
             sequence_length = np.random.randint(1, max_sequence_length + 1)
             end_pos = start_pos + sequence_length
 
-            if end_pos >= len(audio):
+            if end_pos >= len(segment_audio):
                 break
 
-            if abs(audio[start_pos] - audio[end_pos]) > max_value_difference:
+            if abs(segment_audio[start_pos] - segment_audio[end_pos]) > max_value_difference:
                 continue
 
-            modified_audio.extend(audio[prev_cut_end:start_pos])
-
+            modified_audio.extend(segment_audio[prev_cut_end:start_pos])
             prev_cut_end = end_pos
 
-        modified_audio.extend(audio[prev_cut_end:])
+        modified_audio.extend(segment_audio[prev_cut_end:])
 
-        return np.array(modified_audio, dtype=audio.dtype)
+        print(len(modified_audio))
+
+        final_audio = np.concatenate([audio[:start_offset], modified_audio, audio[end_offset:]])
+        return final_audio
