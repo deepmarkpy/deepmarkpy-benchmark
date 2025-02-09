@@ -1,5 +1,4 @@
 import numpy as np
-import librosa
 from tqdm import tqdm
 
 from plugins.attacks.replacement.psychoacoustic_model import PsychoacousticModel
@@ -150,7 +149,11 @@ def replacement_attack(
     overlap_factor=0.75,
     lower_bound=0,
     upper_bound=10,
+<<<<<<< Updated upstream
     k=30,
+=======
+    k=1,
+>>>>>>> Stashed changes
     use_masking=False,
 ):
     """
@@ -201,7 +204,8 @@ def replacement_attack(
         if len(similar_blocks) == 0:
             replacement_block = block
         else:
-            replacement_block = least_squares_approximation(block, similar_blocks)
+            replacement_block = most_similar_block
+            #replacement_block = least_squares_approximation(block, similar_blocks)
             dist = distance_function(block, replacement_block, masking_model)
             best_dist = distance_function(block, most_similar_block, masking_model)
             cnt_replaced += 1
@@ -214,18 +218,3 @@ def replacement_attack(
 
     print(f"Replaced:{(cnt_replaced / total * 100):.2f}% of blocks.")
     return signal_synthesis(np.array(processed_blocks), block_size, hop_size)[: len(x)]
-
-
-if __name__ == "__main__":
-    x, sr = librosa.load("1.wav", sr=None)
-    y = replacement_attack(x, sr)
-
-    print("Distortion:", 10 * np.log10(np.linalg.norm(x - y)))
-    print("SNR:", 10 * np.log10(np.sum(x**2) / np.sum((x - y) ** 2)))
-
-    from scipy.io.wavfile import write
-
-    if np.issubdtype(y.dtype, np.floating):
-        y = np.int16(y / np.max(np.abs(y)) * 32767)
-
-    write("output.wav", sr, y)
