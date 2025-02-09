@@ -150,7 +150,11 @@ def replacement_attack(
     lower_bound=0,
     upper_bound=10,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     k=30,
+=======
+    k=1,
+>>>>>>> Stashed changes
 =======
     k=1,
 >>>>>>> Stashed changes
