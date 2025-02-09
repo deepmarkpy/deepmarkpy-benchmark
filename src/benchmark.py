@@ -86,7 +86,7 @@ class Benchmark:
     def run(
         self,
         filepaths,
-        model_name,
+        wm_model,
         watermark_data=None,
         attack_types=None,
         sampling_rate=None,
@@ -116,16 +116,16 @@ class Benchmark:
         results = {}
 
         # Make sure the requested model exists
-        if model_name not in self.models:
+        if wm_model not in self.models:
             raise ValueError(
-                f"Model '{model_name}' not found. Available: {list(self.models.keys())}"
+                f"Model '{wm_model}' not found. Available: {list(self.models.keys())}"
             )
 
-        model_cls = self.models[model_name]["class"]
+        model_cls = self.models[wm_model]["class"]
         model_instance = model_cls()
 
         if sampling_rate is None:
-            sampling_rate=self.models[model_name]["config"]["sampling_rate"]
+            sampling_rate=self.models[wm_model]["config"]["sampling_rate"]
 
         attack_kwargs = {
             **kwargs,
