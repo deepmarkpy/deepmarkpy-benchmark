@@ -3,13 +3,12 @@
 # DeepMark Benchmark
 
 DeepMark Benchmark is a modular and scalable platform for evaluating the robustness of audio watermarking systems. It enables testing against various attacks, including both simple signal manipulations and advanced AI-based disruptions.
+ 
+---
 
 ## Installation
 
 ### 1. Clone the Repository
-git clone https://github.com/your-repo/deepmark-benchmark.git
-cd deepmark-benchmark
-
 ```Shell
 git clone https://github.com/your-repo/deepmark-benchmark.git
 cd deepmark-benchmark
@@ -52,6 +51,9 @@ Additional parameters depend on the attack configurations.
 The benchmark will generate:
 - benchmark_results.json – Stores detailed attack results.
 - benchmark_stats.json – Summary of attack effectiveness.
+
+---
+
 
 ## Adding a New Plugin
 
@@ -113,3 +115,33 @@ class NewModel(BaseModel):
         """Detects watermark from the audio."""
         return np.random.randint(0, 2, size=16)
 ```
+3.	Add config.json
+```json
+{
+    "watermark_size": 16
+}
+```
+4.	Run the Benchmark with the New Model
+```Shell
+python src/run.py --wav_files_dir path/to/audio --model NewModel --attacks CutSamplesAttack
+```
+### Docker Integration
+To run AI-based plugins inside Docker:
+```Shell
+docker-compose up --build -d
+```
+To stop:
+```shell
+docker-compose down
+```
+<hr/>
+## Contributing
+We welcome contributions! Feel free to:
+- Report issues
+- Suggest new features
+- Submit pull requests
+  
+---
+
+## License
+This project is licensed under MIT License.
