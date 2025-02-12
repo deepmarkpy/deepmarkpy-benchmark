@@ -1,4 +1,5 @@
 import numpy as np
+import librosa
 from tqdm import tqdm
 
 from plugins.attacks.replacement.psychoacoustic_model import PsychoacousticModel
@@ -149,19 +150,7 @@ def replacement_attack(
     overlap_factor=0.75,
     lower_bound=0,
     upper_bound=10,
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    k=30,
-=======
-    k=1,
->>>>>>> Stashed changes
-=======
-    k=1,
->>>>>>> Stashed changes
-=======
-    k=1,
->>>>>>> Stashed changes
+    k=100,
     use_masking=False,
 ):
     """
@@ -212,8 +201,7 @@ def replacement_attack(
         if len(similar_blocks) == 0:
             replacement_block = block
         else:
-            replacement_block = most_similar_block
-            #replacement_block = least_squares_approximation(block, similar_blocks)
+            replacement_block = least_squares_approximation(block, similar_blocks)
             dist = distance_function(block, replacement_block, masking_model)
             best_dist = distance_function(block, most_similar_block, masking_model)
             cnt_replaced += 1
