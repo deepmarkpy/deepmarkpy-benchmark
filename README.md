@@ -3,8 +3,6 @@
 # DeepMark Benchmark
 
 DeepMark Benchmark is a modular and scalable platform for evaluating the robustness of audio watermarking systems. It enables testing against various attacks, including both simple signal manipulations and advanced AI-based disruptions.
- 
----
 
 ## Installation
 
@@ -51,9 +49,6 @@ Additional parameters depend on the attack configurations.
 The benchmark will generate:
 - benchmark_results.json – Stores detailed attack results.
 - benchmark_stats.json – Summary of attack effectiveness.
-
----
-
 
 ## Adding a New Plugin
 
@@ -134,14 +129,12 @@ To stop:
 ```shell
 docker-compose down
 ```
-<hr/>
+
 ## Contributing
 We welcome contributions! Feel free to:
 - Report issues
 - Suggest new features
 - Submit pull requests
-  
----
 
 ## License
 This project is licensed under MIT License.
