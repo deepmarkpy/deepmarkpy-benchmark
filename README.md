@@ -8,8 +8,8 @@ DeepMark Benchmark is a modular and scalable platform for evaluating the robustn
 
 ### 1. Clone the Repository
 ```Shell
-git clone https://github.com/your-repo/deepmark-benchmark.git
-cd deepmark-benchmark
+git clone https://github.com/deepmarkpy/deepmarkpy-benchmark.git
+cd deepmarkpy-benchmark
 ```
 ### 2. Create and Activate a Virtual Environment
 Linux/Mac:
