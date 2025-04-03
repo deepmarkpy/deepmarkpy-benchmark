@@ -5,17 +5,16 @@ __pycache__/
 
 #Files
 *.wav
+*.mp3
 
 # C extensions
 *.so
 
-*.json
+benchmark*.json
 
 *.DS_Store
 
 *.ts
-
-*.json
 
 # Distribution / packaging
 .Python

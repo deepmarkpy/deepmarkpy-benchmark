@@ -25,11 +25,14 @@ class PitchShiftAttack(BaseAttack):
             - Ensure that pyrubberband and the Rubber Band Library are installed before use.
         """
 
-        sampling_rate = kwargs.get("sampling_rate", self.config.get("cents"))
+        sampling_rate = kwargs.get("sampling_rate", None)
         cents = kwargs.get("cents", self.config.get("cents"))
 
         sampling_rate = kwargs.get("sampling_rate", None)
-        cents = kwargs.get("cents", None)
+        if sampling_rate is None or cents is None:
+            raise ValueError(
+                "A sampling_rate and cents must be specified for PitchShiftAttack."
+            )
 
         semitones = cents / 100
         return pyrb.pitch_shift(audio, sampling_rate, semitones)

@@ -2,7 +2,7 @@ from core.base_attack import BaseAttack
 import numpy as np
 
 
-class SameModelAttack(BaseAttack):
+class CollusionAttack(BaseAttack):
 
     def apply(self, audio: np.ndarray, **kwargs) -> np.ndarray:
         """
@@ -13,8 +13,8 @@ class SameModelAttack(BaseAttack):
             audio (np.ndarray): The original watermarked audio.
             **kwargs: Additional parameters for the attack.
                 - model (BaseModel): BaseModel instance of the watermarking model.
-                - sampling_rate (int): Sampling rate of the audio.
                 - orig_audio (np.ndarray): Original audio file.
+                - sampling_rate (int): Sampling rate of the audio.
                 - collusion_size(int): Size of the collusion segment.
 
         Returns:
@@ -29,7 +29,7 @@ class SameModelAttack(BaseAttack):
                 "'model', 'orig_audio' and 'sampling_rate' must be provided for the collusion attack."
             )
 
-        second_audio = model.embed(orig_audio, sampling_rate)
+        second_audio = model.embed(orig_audio, model.generate_watermark(), sampling_rate)
 
         segment_size = kwargs.get("collusion_size", 25)
         num_segments = len(audio) // segment_size
