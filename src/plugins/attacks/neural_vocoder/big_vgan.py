@@ -1,14 +1,14 @@
-import sys
 import os
+import sys
+
 import torch
 from app_utils.utils import resample_audio
-
 
 sys.path.append("BigVGAN")
 
 import bigvgan
-
 from meldataset import get_mel_spectrogram
+
 
 class BigVGAN:
     def __init__(self, model_name, device):

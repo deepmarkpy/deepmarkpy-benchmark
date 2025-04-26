@@ -1,7 +1,12 @@
 import numpy as np
 import torch
+from speechbrain.inference.enhancement import (
+    SpectralMaskEnhancement,
+    WaveformEnhancement,
+)
+
 from utils.utils import resample_audio
-from speechbrain.inference.enhancement import SpectralMaskEnhancement, WaveformEnhancement
+
 
 class SpeechBrain:
     def __init__(self, type):

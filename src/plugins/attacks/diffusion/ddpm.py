@@ -1,8 +1,8 @@
-from diffusers import DiffusionPipeline
-import torch
-from utils.utils import resample_audio, renormalize_audio
-
 import numpy as np
+import torch
+from diffusers import DiffusionPipeline
+
+from utils.utils import renormalize_audio, resample_audio
 
 
 class DDPM:

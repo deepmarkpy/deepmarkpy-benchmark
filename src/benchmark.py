@@ -1,8 +1,13 @@
-import numpy as np
 import inspect
-from utils.utils import load_audio, snr
-from plugin_manager import PluginManager
+import logging
 
+import numpy as np
+
+from plugin_manager import PluginManager
+from utils.utils import load_audio, snr
+
+
+logger = logging.getLogger(__name__)
 
 class Benchmark:
     """
@@ -30,42 +35,39 @@ class Benchmark:
                     valid_args[key] = value
         return list(models), list(attacks), valid_args
 
-
     def show_available_plugins(self):
         """
         Print out all discovered models and attacks, including any __init__ parameters
         and key-value pairs from config.json (defaults).
         """
-        print("===== Available Models =====")
+        logger.info("===== Available Models =====")
         for model_name, model_entry in self.models.items():
             model_cls = model_entry["class"]
             config = model_entry.get("config") or {}
 
-            # Get the __init__ signature to show possible constructor parameters
             signature = inspect.signature(model_cls.__init__)
             params = [p for p in signature.parameters.values() if p.name != "self"]
-            # Convert to {param_name: default_value}
+
             init_params = {
                 p.name: (None if p.default is inspect.Parameter.empty else p.default)
                 for p in params
             }
 
-            print(f"\nModel: {model_name}")
-            print(f"  - Constructor parameters: {init_params}")
+            logger.info(f"\nModel: {model_name}")
+            logger.info(f"  - Constructor parameters: {init_params}")
 
-            print("  - Arguments defaults:")
+            logger.info("  - Arguments defaults:")
             if config:
                 for key, val in config.items():
-                    print(f"    {key}: {val}")
+                    logger.info(f"    {key}: {val}")
             else:
-                print("    (none found)")
+                logger.info("    (none found)")
 
-        print("\n===== Available Attacks =====")
+        logger.info("\n===== Available Attacks =====")
         for attack_name, attack_entry in self.attacks.items():
             attack_cls = attack_entry["class"]
             config = attack_entry.get("config") or {}
 
-            # Get the __init__ signature
             signature = inspect.signature(attack_cls.__init__)
             params = [p for p in signature.parameters.values() if p.name != "self"]
             init_params = {
@@ -73,15 +75,15 @@ class Benchmark:
                 for p in params
             }
 
-            print(f"\nAttack: {attack_name}")
-            print(f"  - Constructor parameters: {init_params}")
+            logger.info(f"\nAttack: {attack_name}")
+            logger.info(f"  - Constructor parameters: {init_params}")
 
-            print("  - Argument defaults:")
+            logger.info("  - Argument defaults:")
             if config:
                 for key, val in config.items():
-                    print(f"    {key}: {val}")
+                    logger.info(f"    {key}: {val}")
             else:
-                print("    (none found)")
+                logger.info("    (none found)")
 
     def run(
         self,
@@ -115,7 +117,6 @@ class Benchmark:
         attack_types = attack_types or list(self.attacks.keys())
         results = {}
 
-        # Make sure the requested model exists
         if wm_model not in self.models:
             raise ValueError(
                 f"Model '{wm_model}' not found. Available: {list(self.models.keys())}"
@@ -125,26 +126,25 @@ class Benchmark:
         model_instance = model_cls()
 
         if sampling_rate is None:
-            sampling_rate=self.models[wm_model]["config"]["sampling_rate"]
+            sampling_rate = self.models[wm_model]["config"]["sampling_rate"]
 
         attack_kwargs = {
             **kwargs,
             "model": model_instance,
             "watermark_data": watermark_data,
             "sampling_rate": sampling_rate,
-            "models": self.models
+            "models": self.models,
         }
 
         for filepath in filepaths:
             if verbose:
-                print(f"\nProcessing file: {filepath}")
+                logger.info(f"\nProcessing file: {filepath}")
             results[filepath] = {}
 
             # If no user-supplied watermark, pick a random message size
             if watermark_data is None:
                 watermark_data = model_instance.generate_watermark()
                 attack_kwargs["watermark_data"] = model_instance.generate_watermark()
-
 
             # Load audio
             audio, sampling_rate = load_audio(filepath, target_sr=sampling_rate)
@@ -155,32 +155,25 @@ class Benchmark:
                 audio=audio, watermark_data=watermark_data, sampling_rate=sampling_rate
             )
 
-            # Apply each attack
+            # Apply each attack and compute metrics
             for attack_name in attack_types:
                 if attack_name not in self.attacks:
-                    print(f"Attack '{attack_name}' not found. Skipping.")
+                    logger.warning(f"Attack '{attack_name}' not found. Skipping.")
                     continue
 
                 if verbose:
-                    print(f"  Applying attack: {attack_name}")
+                    logger.info(f"  Applying attack: {attack_name}")
 
-                # Create attack instance from plugin data
                 attack_instance = self.attacks[attack_name]["class"]()
 
-                # Construct the kwargs for this attack
-
-                # Apply attack
                 attacked_audio = attack_instance.apply(
                     watermarked_audio, **attack_kwargs
                 )
 
-                # Detect (extract) watermark from attacked audio
                 detected_message = model_instance.detect(attacked_audio, sampling_rate)
 
-                # Compute accuracy
                 accuracy = self.compare_watermarks(watermark_data, detected_message)
 
-                # Compute SNR if lengths match, else "N/A"
                 if abs(len(audio) - len(attacked_audio)) > 1:
                     snr_val = "N/A"
                 else:
@@ -212,7 +205,6 @@ class Benchmark:
                     attack_accuracies[attack_name] = []
                 attack_accuracies[attack_name].append(metrics["accuracy"])
 
-        # Compute mean accuracy
         mean_accuracies = {
             attack_name: np.mean(accuracies)
             for attack_name, accuracies in attack_accuracies.items()

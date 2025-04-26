@@ -2,6 +2,13 @@ FROM python:3.11-slim-buster AS builder
 
 WORKDIR /app
 
+# Set ARG for build-time use defaults
+ARG APP_PORT=10001
+ENV APP_PORT=${VAE_PORT}
+
+ARG HOST = "0.0.0.0"
+ENV HOST=${HOST}
+
 # Install dependencies in a temporary layer
 COPY /src/plugins/attacks/vae/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
@@ -26,4 +33,4 @@ COPY src/plugins/attacks/vae .
 EXPOSE 10001
 
 # Run the FastAPI server using Uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "10001"]
+CMD ["uvicorn", "app:app", "--host", "${HOST}", "--port", "${APP_PORT}"]

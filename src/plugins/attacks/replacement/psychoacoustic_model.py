@@ -2,10 +2,11 @@ __author__ = "S.I. Mimilakis"
 __copyright__ = "MacSeNet"
 
 import math
+
 import numpy as np
 from scipy.fftpack import fft, ifft
-from scipy.signal import firwin2, freqz
 from scipy.interpolate import InterpolatedUnivariateSpline as uspline
+from scipy.signal import firwin2, freqz
 from scipy.signal.windows import hamming
 
 eps = np.finfo(np.float32).tiny

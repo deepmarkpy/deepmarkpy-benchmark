@@ -1,22 +1,31 @@
+import logging
+import os
+import sys
 from typing import List
+
 import numpy as np
-from pydantic import BaseModel
 import torch
-from fastapi import FastAPI
 import uvicorn
-import json
+from fastapi import FastAPI
+from pydantic import BaseModel
 from xcodec import XCodec
+
+from utils.utils import load_config
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-with open("config.json") as json_file:
-    config = json.load(json_file)
-
-model_name = config["model_name"]
+try:
+    config = load_config("config.json")
+except (FileNotFoundError, ValueError, IOError) as e:
+    logger.critical(f"Failed to load configuration: {e}. Application cannot start.")
+    sys.exit(1)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+logger.info(f"Using device: {device}")
 
-model = XCodec(model_name, device)
+model = XCodec(config["model_name"], device)
 
 
 class AttackRequest(BaseModel):
@@ -35,4 +44,9 @@ async def attack(request: AttackRequest):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=config["port"])
+    # Use the default as a fallback if SPEECH_TOKENIZATION_PORT is not set in the environment
+    app_port = int(os.getenv("SPEECH_TOKENIZATION_PORT", 10001))
+    host = os.environ.get("HOST", "0.0.0.0")
+
+    logger.info(f"Starting server on port {app_port}")
+    uvicorn.run(app, host={host}, port={app_port})

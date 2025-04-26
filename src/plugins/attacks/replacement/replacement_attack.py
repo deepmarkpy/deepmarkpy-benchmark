@@ -1,9 +1,11 @@
+import logging
+
 import numpy as np
-import librosa
 from tqdm import tqdm
 
 from plugins.attacks.replacement.psychoacoustic_model import PsychoacousticModel
 
+logger = logging.getLogger(__name__)
 
 def signal_analysis(x, block_size, hop_size):
     """
@@ -212,5 +214,5 @@ def replacement_attack(
         total += 1
         processed_blocks.append(replacement_block)
 
-    print(f"Replaced:{(cnt_replaced / total * 100):.2f}% of blocks.")
+    logger.info(f"Replaced:{(cnt_replaced / total * 100):.2f}% of blocks.")
     return signal_synthesis(np.array(processed_blocks), block_size, hop_size)[: len(x)]

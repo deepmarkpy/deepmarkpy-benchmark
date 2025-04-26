@@ -1,6 +1,48 @@
+import json
+import logging
+import os
+from typing import Dict
+
 import librosa
 import numpy as np
 from scipy.signal import resample_poly
+
+logger = logging.getLogger(__name__)
+
+
+def load_config(config_path: str = "config.json") -> Dict:
+    """
+    Loads a JSON configuration file.
+
+    Args:
+        config_path (str): The path to the configuration file. Defaults to "config.json".
+
+    Returns:
+        Dict: The loaded configuration dictionary.
+
+    Raises:
+        FileNotFoundError: If the configuration file is not found at the specified path.
+        ValueError: If the file cannot be decoded as JSON.
+        IOError: If there's an error reading the file (e.g., permissions).
+    """
+    if not os.path.exists(config_path):
+        error_msg = f"Configuration file not found: {config_path}"
+        logger.error(error_msg)
+        raise FileNotFoundError(error_msg)
+
+    try:
+        with open(config_path, "r") as f:
+            config_data = json.load(f)
+        logger.info(f"Successfully loaded configuration from: {config_path}")
+        return config_data
+    except json.JSONDecodeError as e:
+        error_msg = f"Error decoding JSON from configuration file {config_path}: {e}"
+        logger.error(error_msg)
+        raise ValueError(error_msg) from e
+    except IOError as e:
+        error_msg = f"An I/O error occurred while reading {config_path}: {e}"
+        logger.error(error_msg)
+        raise IOError(error_msg) from e
 
 def load_audio(file_path, target_sr=None, mono=True):
     """

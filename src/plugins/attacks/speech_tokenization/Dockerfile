@@ -2,6 +2,13 @@ FROM python:3.10-slim AS builder
 
 WORKDIR /app
 
+# Set ARG for build-time use defaults
+ARG APP_PORT=10003
+ENV APP_PORT=${SPEECH_TOKENIZATION_PORT}
+
+ARG HOST = "0.0.0.0"
+ENV HOST=${HOST}
+
 # Install dependencies in a temporary layer
 COPY /src/plugins/attacks/speech_tokenization/requirements.txt .
 COPY /src/plugins/attacks/speech_tokenization/xcodec_requirements.txt .
@@ -33,8 +40,8 @@ COPY src/utils ./utils
 
 COPY src/plugins/attacks/speech_tokenization .
 
-# Expose the service port
-EXPOSE 10003
+# Expose the port defined by the build argument/environment variable
+EXPOSE ${APP_PORT}
 
 # Run the FastAPI server using Uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "10003"]
+CMD ["uvicorn", "app:app", "--host", "${HOST}", "--port", "${APP_PORT}"]

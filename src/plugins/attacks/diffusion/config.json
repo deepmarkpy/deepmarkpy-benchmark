@@ -1,6 +1,4 @@
 {
     "model_name": "teticio/audio-diffusion-256",   
-    "diffusion_steps": 5,
-    "endpoint": "http://localhost:10002",
-    "port": 10002
+    "diffusion_steps": 5
 }

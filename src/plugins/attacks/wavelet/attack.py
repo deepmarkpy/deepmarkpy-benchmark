@@ -1,5 +1,5 @@
-import pywt
 import numpy as np
+import pywt
 
 from core.base_attack import BaseAttack
 
