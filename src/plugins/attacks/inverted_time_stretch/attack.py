@@ -1,7 +1,7 @@
+import numpy as np
+
 from core.base_attack import BaseAttack
 from plugins.attacks.time_stretch.attack import TimeStretchAttack
-
-import numpy as np
 
 
 class InvertedTimeStretch(BaseAttack):

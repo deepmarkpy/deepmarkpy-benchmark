@@ -1,51 +1,88 @@
+# DeepMarkPy Benchmark
 
+DeepMark Benchmark is a modular and scalable Python platform for evaluating the robustness of audio watermarking systems. It enables testing against various attacks, including both simple signal manipulations and advanced AI-based disruptions, using a containerized architecture for consistency and ease of use.
 
-# DeepMark Benchmark
+## Features
 
-DeepMark Benchmark is a modular and scalable platform for evaluating the robustness of audio watermarking systems. It enables testing against various attacks, including both simple signal manipulations and advanced AI-based disruptions.
+*   **Extensible Plugin System:** Easily add new watermarking models and attacks.
+*   **Containerized Services:** Key models and attacks run as isolated Docker services for dependency management and reproducibility.
+*   **Centralized Configuration:** Service network ports are managed via a single `.env` file.
+*   **Client-Server Architecture:** The benchmark runner communicates with containerized plugins via HTTP.
+*   **Standardized Execution:** Provides a CLI for running benchmarks and collecting results.
 
-## Installation
+## Architecture Overview
+
+This benchmark uses a client-server architecture. Core watermarking models and complex attacks (often AI-based) run as independent web services managed by Docker Compose. The main benchmark script (`src/run.py`) acts as a client, communicating with these services via HTTP requests over a Docker network to perform embedding, attacking, and detection. This isolates complex dependencies within containers.
+
+## Prerequisites
+
+*   Python 3.9+
+*   Docker (Install Docker)
+*   Docker Compose (Install Docker Compose)
+
+## Setup
 
 ### 1. Clone the Repository
-```Shell
+
+```bash
 git clone https://github.com/deepmarkpy/deepmarkpy-benchmark.git
 cd deepmarkpy-benchmark
 ```
-### 2. Create and Activate a Virtual Environment
-Linux/Mac:
-```Shell
+
+### 2. Review Environment File (`.env`)
+
+This repository includes a `.env` file which defines the default network ports used by the various Docker services (models and attacks). Docker Compose automatically reads this file when starting the services.
+
+*   **Action:** Review the ports defined in the `.env` file. You generally don't need to change the defaults unless they conflict with other services already running on your machine. If a conflict exists, modify the corresponding port number in the `.env` file before proceeding.
+
+### 3. Install Core Dependencies (Optional - for development/direct script interaction)
+
+It's recommended to use a virtual environment for the benchmark runner itself:
+
+Linux/macOS: 
+```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
-Windows:
-```Shell
+
+Windows
+```bash
 python -m venv venv
 venv\Scripts\activate
 ```
-### 3. Install Dependencies
-```Shell
+
+Install core benchmark runner dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
+
 ### 4. Install Docker (For AI-Based Attacks and Models)
 If you plan to use AI-powered attacks or models, install [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/).
 
+
 ## Running the Benchmark
-### 1. Ensure Docker Containers Are Running
-For AI-based attacks and models, start the services:
-```Shell
+
+### 1. Build and Start Services
+
+This command builds the Docker images for all containerized models/attacks (defined in `docker-compose.yml`) using the configuration from `.env` and starts them in the background. This step is **required** if you intend to use plugins like `audioseal`, `vae`, `diffusion`, etc.
+```bash
 docker-compose up --build -d
 ```
-### 2. Run the CLI
-```Shell
-python src/run.py --wav_files_dir path/to/audio --model AudioSealModel --attacks CutSamplesAttack TimeStretchAttack --num_flips 100 --flip_duration 0.5
-```
-- --wav_files_dir: Path to the directory containing .wav files.
-- --model: The watermarking model to use (AudioSealModel, WavMarkModel, etc.).
-- --attacks: List of attacks to apply (CutSamplesAttack, PitchShiftAttack, etc.).
+You can check the status of the services using `docker-compose ps`. The first build might take some time.
 
-Additional parameters depend on the attack configurations.
+### 2. Run the CLI
+Ensure the Docker services are running (`docker-compose up -d`) if you are using containerized plugins. Then, execute the main benchmark script from your activated virtual environment (if used) or directly:
+
+```bash
+python src/run.py --wav_files_dir /path/to/your/audio/files \
+                  --wm_model audioseal \
+                  --attack_types vae diffusion mp3_compression \
+                  # Add any other specific attack parameters like --vae_intensity 0.7
+```
 
 ### 3. View Results
+
 The benchmark will generate:
 - benchmark_results.json – Stores detailed attack results.
 - benchmark_stats.json – Summary of attack effectiveness.
@@ -55,6 +92,7 @@ The benchmark will generate:
 DeepMark Benchmark is designed to allow easy addition of new attacks and watermarking models.
 
 ### Adding a New Attack
+
 1.	Create a New Attack Folder
 
 Inside src/plugins/attacks, create a new folder with the attack name:
@@ -82,20 +120,25 @@ class NewAttack(BaseAttack):
 4.	Dockerizing (Optional)
 
     If your attack requires AI models:
-  - Add server.py for FastAPI service.
+  - Add app.py for FastAPI service.
+  - Add port to the .env file.
   - Write a Dockerfile to containerize it.
   - Add it to docker-compose.yml.
+
 5.	Run the Benchmark
-```Shell 
-python src/run.py --wav_files_dir path/to/audio --model AudioSealModel --attacks NewAttack
+```bash 
+python src/run.py --wav_files_dir path/to/audio --wm_model AudioSealModel --attack_types NewAttack
 ```
+
 ### Adding a New Watermarking Model
+
 1.	Create a New Model Folder
 
 Inside src/plugins/models, create a folder:
 ```Shell 
 mkdir src/plugins/models/new_model
 ```
+
 2.	Add model.py
 ```python
 import numpy as np
@@ -110,17 +153,21 @@ class NewModel(BaseModel):
         """Detects watermark from the audio."""
         return np.random.randint(0, 2, size=16)
 ```
+
 3.	Add config.json
 ```json
 {
     "watermark_size": 16
 }
 ```
+
 4.	Run the Benchmark with the New Model
 ```Shell
 python src/run.py --wav_files_dir path/to/audio --model NewModel --attacks CutSamplesAttack
 ```
+
 ### Docker Integration
+
 To run AI-based plugins inside Docker:
 ```Shell
 docker-compose up --build -d
@@ -131,10 +178,21 @@ docker-compose down
 ```
 
 ## Contributing
+
 We welcome contributions! Feel free to:
 - Report issues
 - Suggest new features
 - Submit pull requests
 
+## Citation
+
+If you use DeepMarkPy Benchmark in your research, please cite our paper:
+
+< ISPRAVITE OVDJE KAKO IDE ZAISTA >
+```
+@inproceedings{deepmarkpy, title={DeepMarkPy: A Modular and Scalable Benchmark for Audio Watermarking Robustness}, author={Kovacevic S., Pavlovic K. et al.}, booktitle={ICML Workshop on Security and Privacy in Machine Learning}, year={2025}}
+```
+
 ## License
+
 This project is licensed under MIT License.

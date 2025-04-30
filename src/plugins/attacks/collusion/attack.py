@@ -1,5 +1,6 @@
-from core.base_attack import BaseAttack
 import numpy as np
+
+from core.base_attack import BaseAttack
 
 
 class CollusionAttack(BaseAttack):

@@ -1,6 +1,4 @@
 {
-    "endpoint": "http://localhost:10003",
     "model_name": "HKUST-Audio/xcodec2",
-    "port": 10003,
     "sampling_rate": 16000
 }

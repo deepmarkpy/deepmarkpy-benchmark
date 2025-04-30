@@ -1,9 +1,12 @@
 import abc
-import json
-import numpy as np
-import os
 import inspect
+import json
+import logging
+import os
 
+import numpy as np
+
+logger = logging.getLogger(__name__)
 
 class BaseAttack(abc.ABC):
     """
@@ -21,17 +24,17 @@ class BaseAttack(abc.ABC):
         - Constructs the path to `config.json` in the attack's directory.
         - Loads the configuration if the file exists, otherwise sets `_config` to None.
         """
-        model_file = inspect.getfile(self.__class__)  # Get the file path of the subclass
-        model_dir = os.path.dirname(os.path.abspath(model_file))  # Get its directory
+        model_file = inspect.getfile(self.__class__)
+        model_dir = os.path.dirname(os.path.abspath(model_file))
 
-        self.config_path = os.path.join(model_dir, "config.json")  # Define path to config.json
+        self.config_path = os.path.join(model_dir, "config.json")
 
         if not os.path.exists(self.config_path):
-            print(f"config.json not found in {self.config_path}")  # Warn if config is missing
-            self._config = None  # No config available
+            logging.warning(f"config.json not found in {self.config_path}")
+            self._config = None
         else:
             with open(self.config_path, "r") as json_file:
-                self._config = json.load(json_file)  # Load the config file
+                self._config = json.load(json_file)
 
     @abc.abstractmethod
     def apply(self, audio: np.ndarray, **kwargs) -> np.ndarray:

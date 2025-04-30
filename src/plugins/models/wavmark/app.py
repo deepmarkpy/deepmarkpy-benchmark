@@ -1,21 +1,31 @@
-import json
+import logging
+import os
+import sys
 from typing import List
+
+import numpy as np
+import torch
+import uvicorn
+import wavmark
 from fastapi import FastAPI
 from pydantic import BaseModel
-import numpy as np
-import wavmark
-import uvicorn
-import torch
 
-from utils.utils import resample_audio
+from utils.utils import load_config, resample_audio
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+logger.info(f"Using device: {device}")
+
 model = wavmark.load_model().to(device)
 
-with open('config.json') as json_file:
-    config = json.load(json_file)
+try:
+    config = load_config("config.json")
+except (FileNotFoundError, ValueError, IOError) as e:
+    logger.critical(f"Failed to load configuration: {e}. Application cannot start.")
+    sys.exit(1)
 
 class EmbedRequest(BaseModel):
     audio: List[float]
@@ -53,4 +63,9 @@ async def detect(request: DetectRequest):
     return {"watermark": message if message is None else message.tolist()}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=config["port"])
+    # Use the default as a fallback if WAVMARK_PORT is not set in the environment
+    app_port = int(os.getenv("WAVMARK_PORT", 7001))
+    host = os.environ.get("HOST", "0.0.0.0")
+
+    logger.info(f"Starting server on port {app_port}")
+    uvicorn.run(app, host={host}, port={app_port})

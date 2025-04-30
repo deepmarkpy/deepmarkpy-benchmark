@@ -1,53 +1,75 @@
+# Now, if you need to change the port for audioseal, you only need to modify the AUDIOSEAL_PORT line in the .env file and restart the services (docker-compose down && docker-compose up -d --build). All components will pick up the new value.
+
 services:
   audioseal:
     build:
       context: .
       dockerfile: src/plugins/models/audio_seal/Dockerfile
     ports:
-      - "5001:5001"
+      - "${AUDIOSEAL_PORT}:${AUDIOSEAL_PORT}" # Reads from .env
+    environment:
+      - APP_PORT=${AUDIOSEAL_PORT} # Injects into container
+
   silentcipher:
     build:
       context: .
       dockerfile: src/plugins/models/silent_cipher/Dockerfile
     ports:
-      - "7001:7001"
+      - "${SILENTCIPHER_PORT}:${SILENTCIPHER_PORT}"
+    environment:
+      - APP_PORT=${SILENTCIPHER_PORT}
+
   wavmark:
     build:
       context: .
       dockerfile: src/plugins/models/wavmark/Dockerfile
     ports:
-      - "8001:8001"
+      - "${WAVMARK_PORT}:${WAVMARK_PORT}"
+    environment:
+      - APP_PORT=${WAVMARK_PORT}
+
   vae:
     build:
       context: .
       dockerfile: src/plugins/attacks/vae/Dockerfile
     ports:
-      - "10001:10001"
+      - "${VAE_PORT}:${VAE_PORT}"
+    environment:
+      - APP_PORT=${VAE_PORT}
 
   diffusion:
     build:
       context: .
       dockerfile: src/plugins/attacks/diffusion/Dockerfile
     ports:
-      - "10002:10002"
-  
+      - "${DIFFUSION_PORT}:${DIFFUSION_PORT}"
+    environment:
+      - APP_PORT=${DIFFUSION_PORT}
+
   speech_tokenization:
     build:
       context: .
       dockerfile: src/plugins/attacks/speech_tokenization/Dockerfile
     ports:
-      - "10003:10003"
+      - "${SPEECH_TOKENIZATION_PORT}:${SPEECH_TOKENIZATION_PORT}"
+    environment:
+      - APP_PORT=${SPEECH_TOKENIZATION_PORT}
 
   neural_vocoder:
     build:
       context: .
       dockerfile: src/plugins/attacks/neural_vocoder/Dockerfile
     ports:
-      - "10004:10004"
+      - "${NEURAL_VOCODER_PORT}:${NEURAL_VOCODER_PORT}"
+    environment:
+      - APP_PORT=${NEURAL_VOCODER_PORT}
 
   speech_enhancement:
     build:
       context: .
       dockerfile: src/plugins/attacks/speech_enhancement/Dockerfile
     ports:
-      - "10005:10005"
+      - "${SPEECH_ENHANCEMENT_PORT}:${SPEECH_ENHANCEMENT_PORT}"
+    environment:
+      - APP_PORT=${SPEECH_ENHANCEMENT_PORT}
+

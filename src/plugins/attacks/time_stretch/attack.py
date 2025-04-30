@@ -1,7 +1,7 @@
-from core.base_attack import BaseAttack
-
 import numpy as np
 import pyrubberband as pyrb
+
+from core.base_attack import BaseAttack
 
 
 class TimeStretchAttack(BaseAttack):

@@ -1,4 +1,5 @@
 import numpy as np
+
 from core.base_attack import BaseAttack
 from plugins.attacks.replacement.replacement_attack import replacement_attack
 

@@ -1,6 +1,8 @@
-from core.base_attack import BaseAttack
-import numpy as np
 import random
+
+import numpy as np
+
+from core.base_attack import BaseAttack
 
 
 class CrossModelAttack(BaseAttack):

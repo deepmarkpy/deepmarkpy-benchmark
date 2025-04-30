@@ -1,8 +1,14 @@
+import logging
 import os
+import shutil
+
 import torch
 from huggingface_hub import hf_hub_download
-import shutil
+
 from utils.utils import renormalize_audio
+
+logger = logging.getLogger(__name__)
+
 
 class VAE():
     def __init__(self, model_name, device):
@@ -15,7 +21,7 @@ class VAE():
         local_model_path = os.path.join(local_model_dir, model_filename)
 
         if not os.path.exists(local_model_path):
-            print(
+            logger.info(
                 f"Model '{model_filename}' not found. Downloading from Hugging Face..."
             )
             downloaded_path = hf_hub_download(repo_id=repo_id, filename=model_filename)
