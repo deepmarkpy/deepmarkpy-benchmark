@@ -188,9 +188,15 @@ We welcome contributions! Feel free to:
 
 If you use DeepMarkPy Benchmark in your research, please cite our paper:
 
-< ISPRAVITE OVDJE KAKO IDE ZAISTA >
 ```
-@inproceedings{deepmarkpy, title={DeepMarkPy: A Modular and Scalable Benchmark for Audio Watermarking Robustness}, author={Kovacevic S., Pavlovic K. et al.}, booktitle={ICML Workshop on Security and Privacy in Machine Learning}, year={2025}}
+@inproceedings{
+kovacevic2025deepmark,
+title={DeepMark Benchmark: Redefining Audio Watermarking Robustness},
+author={Slavko Kova{\v{c}}evi{\'c} and Murilo Z. Silvestre and Kosta Pavlovi{\'c} and Petar Nedi{\'c} and Igor Djurovi{\'c}},
+booktitle={The 1st Workshop on GenAI Watermarking},
+year={2025},
+url={https://openreview.net/forum?id=56ZC5dqvJO}
+}
 ```
 
 ## License
