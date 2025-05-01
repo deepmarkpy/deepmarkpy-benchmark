@@ -76,9 +76,9 @@ Ensure the Docker services are running (`docker-compose up -d`) if you are using
 
 ```bash
 python src/run.py --wav_files_dir /path/to/your/audio/files \
-                  --wm_model audioseal \
-                  --attack_types vae diffusion mp3_compression \
-                  # Add any other specific attack parameters like --vae_intensity 0.7
+                  --wm_model AudioSealModel \
+                  --attack_types VAEAttack SpeechEnhancementAttack \
+                  # Add any other specific attack parameters like --zero_cross_pause_length 25
 ```
 
 ### 3. View Results
