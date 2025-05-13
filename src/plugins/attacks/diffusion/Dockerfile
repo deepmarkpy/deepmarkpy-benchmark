@@ -33,4 +33,4 @@ COPY src/plugins/attacks/diffusion .
 EXPOSE ${APP_PORT}
 
 # Run the FastAPI server using Uvicorn
-CMD ["uvicorn", "app:app", "--host", "${HOST}", "--port", "${APP_PORT}"]
+CMD uvicorn app:app --host 0.0.0.0 --port ${APP_PORT}

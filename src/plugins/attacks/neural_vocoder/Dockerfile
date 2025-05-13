@@ -45,4 +45,4 @@ COPY src/plugins/attacks/neural_vocoder .
 EXPOSE ${APP_PORT}
 
 # Run the FastAPI server using Uvicorn
-CMD ["uvicorn", "app:app", "--host", "${HOST}", "--port", "${APP_PORT}"]
+CMD uvicorn app:app --host ${HOST} --port ${APP_PORT}

@@ -33,4 +33,4 @@ COPY src/plugins/attacks/vae .
 EXPOSE 10001
 
 # Run the FastAPI server using Uvicorn
-CMD ["uvicorn", "app:app", "--host", "${HOST}", "--port", "${APP_PORT}"]
+CMD uvicorn app:app --host ${HOST} --port ${APP_PORT}
