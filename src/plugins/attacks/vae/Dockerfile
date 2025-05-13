@@ -6,7 +6,7 @@ WORKDIR /app
 ARG APP_PORT=10001
 ENV APP_PORT=${VAE_PORT}
 
-ARG HOST = "0.0.0.0"
+ARG HOST="0.0.0.0"
 ENV HOST=${HOST}
 
 # Install dependencies in a temporary layer

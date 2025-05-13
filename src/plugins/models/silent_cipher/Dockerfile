@@ -6,7 +6,7 @@ WORKDIR /app
 ARG APP_PORT=7001
 ENV APP_PORT=${SILENTCIPHER_PORT}
 
-ARG HOST = "0.0.0.0"
+ARG HOST="0.0.0.0"
 ENV HOST=${HOST}
 
 # Install dependencies in a temporary layer
