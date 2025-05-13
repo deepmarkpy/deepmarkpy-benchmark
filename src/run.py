@@ -43,6 +43,14 @@ def main():
         help="List of attacks to apply. Allowed values: " + ", ".join(attacks),
     )
 
+    # Add verbose flag
+    parser.add_argument(
+        "--verbose",
+        type=bool,
+        default=False,
+        help="Enable verbose logging",
+    )
+
     # Dynamically add configuration parameters from the available plugins
     for arg, default_value in valid_args.items():
         if isinstance(default_value, bool):
