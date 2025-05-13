@@ -18,8 +18,8 @@ class AudioSealModel(BaseModel):
             logger.error("AUDIOSEAL_PORT environment variable not set and no default provided.")
             raise ValueError("AUDIOSEAL_PORT must be set")
 
-        self.endpoint = f"http://localhost:{port}"
-        logger.info(f"AudioSealModel initialized. Target API: {self.endpoint}")
+        self.base_url = f"http://localhost:{port}"
+        logger.info(f"AudioSealModel initialized. Target API: {self.base_url}")
 
     def embed(
         self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int
