@@ -67,6 +67,9 @@ async def detect(request: DetectRequest):
     """Detect a watermark from an audio file."""
     audio = np.array(request.audio)
     sampling_rate = request.sampling_rate
+    if sampling_rate != config["sampling_rate"]:
+        audio = resample_audio(request.audio, sampling_rate, config["sampling_rate"])
+
     detector = model["detector"]
     watermarked_audio = np.expand_dims(audio, axis=[0, 1])
     watermarked_audio = torch.tensor(watermarked_audio, dtype=torch.float32)
