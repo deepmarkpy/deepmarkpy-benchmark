@@ -37,7 +37,7 @@ COPY --from=builder /app/BigVGAN /app/BigVGAN
 # Install system dependencies
 RUN apt-get update
 
-COPY src/utils ./app_utils
+COPY src/utils ./utils
 
 COPY src/plugins/attacks/neural_vocoder .
 
@@ -45,4 +45,4 @@ COPY src/plugins/attacks/neural_vocoder .
 EXPOSE ${APP_PORT}
 
 # Run the FastAPI server using Uvicorn
-CMD uvicorn app:app --host ${HOST} --port ${APP_PORT}
+CMD uvicorn app:app --host=$HOST --port=$APP_PORT

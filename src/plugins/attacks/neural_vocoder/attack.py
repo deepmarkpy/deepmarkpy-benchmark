@@ -20,7 +20,7 @@ class NeuralVocoderAttack(BaseAttack):
              raise ValueError("NEURAL_VOCODER_PORT must be set for NeuralVocoderAttack")
 
         self.endpoint = f"http://{host}:{port}"
-        logging.info(f"NeuralVocoderAttack initialized. Target API: {self.enpoint}")
+        logging.info(f"NeuralVocoderAttack initialized. Target API: {self.endpoint}")
 
     def apply(self, audio: np.ndarray, **kwargs) -> np.ndarray:
         sampling_rate = kwargs.get("sampling_rate", None)
