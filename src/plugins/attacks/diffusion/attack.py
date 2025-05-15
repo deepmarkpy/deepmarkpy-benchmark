@@ -20,7 +20,7 @@ class DiffusionAttack(BaseAttack):
              raise ValueError("DIFFUSION_PORT must be set for DiffusionAttack")
 
         self.endpoint = f"http://{host}:{port}"
-        logging.info(f"DiffusionAttack initialized. Target API: {self.enpoint}")
+        logging.info(f"DiffusionAttack initialized. Target API: {self.endpoint}")
 
     def apply(self, audio, **kwargs):
         """Applies the Diffusion attack using the backend service."""

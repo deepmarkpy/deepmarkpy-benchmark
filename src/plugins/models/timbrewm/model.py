@@ -7,24 +7,24 @@ from core.base_model import BaseModel
 
 logger = logging.getLogger(__name__)
 
-class AudioSealModel(BaseModel):
+class TimbreWMModel(BaseModel):
     def __init__(self):
         super().__init__()
 
         # Determine the APP PORT from environment variables
-        port = os.getenv("AUDIOSEAL_PORT", "5001")
+        port = os.getenv("TIMBREWM_PORT", "9001")
 
         if not port:
-            logger.error("AUDIOSEAL_PORT environment variable not set and no default provided.")
-            raise ValueError("AUDIOSEAL_PORT must be set")
+            logger.error("TIMBREWM_PORT environment variable not set and no default provided.")
+            raise ValueError("TIMBREWM_PORT must be set")
 
         self.base_url = f"http://localhost:{port}"
-        logger.info(f"AudioSealModel initialized. Target API: {self.base_url}")
+        logger.info(f"TimbreWMModel initialized. Target API: {self.base_url}")
 
     def embed(
         self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int
     ) -> np.ndarray:
-        """Embeds a watermark into the audio using the AudioSeal service."""
+        """Embeds a watermark into the audio using the TimbreWM service."""
         payload = {
             "audio": audio.tolist(),
             "watermark_data": watermark_data.tolist(),
@@ -40,7 +40,7 @@ class AudioSealModel(BaseModel):
         return np.array(response_data["watermarked_audio"])
 
     def detect(self, audio: np.ndarray, sampling_rate: int) -> np.ndarray:
-        """Detects a watermark in the audio using the AudioSeal service."""
+        """Detects a watermark in the audio using the TimbreWM service."""
         payload = {"audio": audio.tolist(), "sampling_rate": sampling_rate}
         
         response_data = self._make_request(endpoint="/detect", json_data=payload, method="POST")

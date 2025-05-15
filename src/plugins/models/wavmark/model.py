@@ -24,7 +24,7 @@ class WavMarkModel(BaseModel):
     def embed(
         self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int
     ) -> np.ndarray:
-        """Embeds a watermark into the audio using the AudioSeal service."""
+        """Embeds a watermark into the audio using the WavMark service."""
         payload = {
             "audio": audio.tolist(),
             "watermark_data": watermark_data.tolist(),
@@ -40,7 +40,7 @@ class WavMarkModel(BaseModel):
         return np.array(response_data["watermarked_audio"])
 
     def detect(self, audio: np.ndarray, sampling_rate: int) -> np.ndarray:
-        """Detects a watermark in the audio using the AudioSeal service."""
+        """Detects a watermark in the audio using the WavMark service."""
         payload = {"audio": audio.tolist(), "sampling_rate": sampling_rate}
         
         response_data = self._make_request(endpoint="/detect", json_data=payload, method="POST")

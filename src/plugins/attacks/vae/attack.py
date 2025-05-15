@@ -20,7 +20,7 @@ class VAEAttack(BaseAttack):
              raise ValueError("VAE_PORT must be set for VAEAttack")
 
         self.endpoint = f"http://{host}:{port}"
-        logging.info(f"VAEAttack initialized. Target API: {self.enpoint}")
+        logging.info(f"VAEAttack initialized. Target API: {self.endpoint}")
 
     def apply(self, audio: np.ndarray, **kwargs) -> np.ndarray:
         """Applies the VAE attack using the backend service."""
