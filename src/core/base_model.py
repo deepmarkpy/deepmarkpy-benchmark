@@ -38,7 +38,7 @@ class BaseModel(abc.ABC):
 
         self.endpoint = None # subclasses must set this
     
-    def _make_request(self, endpoint: str, json_data: dict, method: str = "POST", timeout: int = 60) -> dict:
+    def _make_request(self, endpoint: str, json_data: dict, method: str = "POST", timeout: int = 300) -> dict:
         """
         Helper method to make HTTP requests to the model's backend service.
 
@@ -46,7 +46,7 @@ class BaseModel(abc.ABC):
             endpoint (str): The specific API endpoint path (e.g., '/embed').
             json_data (dict): The JSON payload to send.
             method (str): The HTTP method (e.g., 'POST', 'GET'). Defaults to 'POST'.
-            timeout (int): Request timeout in seconds. Defaults to 60.
+            timeout (int): Request timeout in seconds. Defaults to 300.
 
         Returns:
             dict: The JSON response from the server.
