@@ -163,7 +163,7 @@ class NewModel(BaseModel):
 
 4.	Run the Benchmark with the New Model
 ```Shell
-python src/run.py --wav_files_dir path/to/audio --model NewModel --attacks CutSamplesAttack
+python src/run.py --wav_files_dir path/to/audio --wm_model NewModel --attack_types CutSamplesAttack
 ```
 
 ### Docker Integration
