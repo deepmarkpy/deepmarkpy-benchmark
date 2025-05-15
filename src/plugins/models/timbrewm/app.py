@@ -48,7 +48,7 @@ def load_model(process_config, model_config, train_config):
     else:
         encoder = Encoder(model_config, msg_length, win_dim, embedding_dim, nlayers_encoder=nlayers_encoder, attention_heads=attention_heads_encoder).to(device)
         decoder = Decoder(model_config, msg_length, win_dim, embedding_dim, nlayers_decoder=nlayers_decoder, attention_heads=attention_heads_decoder).to(device)
-    path_model = model_config["test"]["model_path"]
+    path_model = os.path.join("TimbreWatermarking/watermarking_model", model_config["test"]["model_path"])
     model_name = model_config["test"]["model_name"]
     if model_name:
         model = torch.load(os.path.join(path_model, model_name), map_location=device)
