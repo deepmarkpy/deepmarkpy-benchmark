@@ -10,7 +10,7 @@ from big_vgan import BigVGAN
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from utils.utils import load_config
+from app_utils.utils import load_config
 
 logger = logging.getLogger(__name__)
 

@@ -37,7 +37,7 @@ COPY --from=builder /app/BigVGAN /app/BigVGAN
 # Install system dependencies
 RUN apt-get update
 
-COPY src/utils ./utils
+COPY src/utils ./app_utils
 
 COPY src/plugins/attacks/neural_vocoder .
 

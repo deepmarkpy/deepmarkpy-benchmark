@@ -1,8 +1,10 @@
 import numpy as np
+import logging
 
 from core.base_attack import BaseAttack
 from plugins.attacks.time_stretch.attack import TimeStretchAttack
 
+logger = logging.getLogger(__name__)
 
 class InvertedTimeStretch(BaseAttack):
 
@@ -30,12 +32,23 @@ class InvertedTimeStretch(BaseAttack):
         sampling_rate = kwargs.get("sampling_rate", None)
         if sampling_rate is None:
             raise ValueError("'sampling_rate' must be provided in kwargs.")
+        
         stretch_rate = kwargs.get(
             "inverted_stretch_rate", self.config.get("inverted_stretch_rate")
         )
-        stretched_audio = self.time_stretch.apply(
-            audio, sampling_rate=sampling_rate, stretch_rate=stretch_rate
-        )
-        return self.time_stretch.apply(
-            stretched_audio, sampling_rate=sampling_rate, stretch_rate=1 / stretch_rate
-        )
+        
+        try:
+            logger.debug(f"Applying first time stretch with rate {stretch_rate}")
+            stretched_audio = self.time_stretch.apply(
+                audio, sampling_rate=sampling_rate, stretch_rate=stretch_rate
+            )
+            
+            logger.debug(f"Applying second time stretch with inverted rate {1/stretch_rate}")
+            return self.time_stretch.apply(
+                stretched_audio, sampling_rate=sampling_rate, stretch_rate=1 / stretch_rate
+            )
+        except Exception as e:
+            logger.error(f"Error in inverted time stretch: {str(e)}")
+            # If an error occurs, return the original audio as a fallback
+            logger.warning("Returning original audio due to error in inverted time stretch")
+            return audio

@@ -60,6 +60,22 @@ pip install -r requirements.txt
 ### 4. Install Docker (For AI-Based Attacks and Models)
 If you plan to use AI-powered attacks or models, install [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/).
 
+### 5. Install Rubberband (Windows Only)
+
+If using time stretch and pitch shift attacks on Windows, you'll need Rubberband CLI:
+
+1. Download Rubberband CLI:
+   - Get Windows executable from [Rubber Band website](https://breakfastquay.com/rubberband/)
+
+2. Extract Files:
+   - Unzip to a directory (e.g. C:\Program Files\rubberband)
+
+3. Add to PATH:
+   - Open System Properties > Advanced > Environment Variables
+   - Under System Variables, find "Path"
+   - Click Edit > New
+   - Add your rubberband directory path
+   - Click OK to save
 
 ## Running the Benchmark
 
@@ -163,7 +179,7 @@ class NewModel(BaseModel):
 
 4.	Run the Benchmark with the New Model
 ```Shell
-python src/run.py --wav_files_dir path/to/audio --model NewModel --attacks CutSamplesAttack
+python src/run.py --wav_files_dir path/to/audio --wm_model NewModel --attack_types CutSamplesAttack
 ```
 
 ### Docker Integration
