@@ -12,11 +12,14 @@ from pydantic import BaseModel
 
 from utils.utils import load_config, resample_audio
 
+# Configure more detailed logging
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+logger.info(f"Using device: {device}")
 
 sys.path.append("TimbreWatermarking/watermarking_model")
 
@@ -88,50 +91,81 @@ class DetectRequest(BaseModel):
 @app.post("/embed")
 async def embed(request: EmbedRequest):
     """Embed a watermark in an audio file."""
-    audio = np.array(request.audio)
-    watermark_data = np.array(request.watermark_data)
-    sampling_rate = request.sampling_rate
-    if sampling_rate != config["sampling_rate"]:
-        audio = resample_audio(request.audio, sampling_rate, config["sampling_rate"])
+    try:
+        logger.debug(f"Received embed request. Audio length: {len(request.audio)}, Watermark length: {len(request.watermark_data)}")
+        audio = np.array(request.audio)
+        watermark_data = np.array(request.watermark_data, dtype=np.float32)
+        sampling_rate = request.sampling_rate
+        logger.debug(f"Audio shape: {audio.shape}, Sampling rate: {sampling_rate}")
+        
+        if sampling_rate != config["sampling_rate"]:
+            logger.debug(f"Resampling from {sampling_rate} to {config['sampling_rate']}")
+            audio = resample_audio(request.audio, sampling_rate, config["sampling_rate"])
+            
+        wav = torch.tensor(audio, dtype=torch.float32)
+        wav = wav.unsqueeze(0).unsqueeze(0).to(device)
+        logger.debug(f"WAV tensor shape: {wav.shape}, dtype: {wav.dtype}")
+        
+        msg = torch.from_numpy(watermark_data).float().unsqueeze(0).unsqueeze(0).to(device)
+        msg = msg * 2 - 1
+        logger.debug(f"MSG tensor shape: {msg.shape}, dtype: {msg.dtype}")
 
-    wav = torch.tensor(audio, dtype=torch.float32)
-    wav = wav.unsqueeze(0).unsqueeze(0).to(device)
-    msg = torch.from_numpy(watermark_data).unsqueeze(0).unsqueeze(0).to(device)
-    msg = msg * 2 - 1
+        logger.debug("Starting model inference")
+        with torch.no_grad():
+            watermarked_audio, _ = embedder.test_forward(wav, msg)
+        logger.debug(f"Model inference complete. Result shape: {watermarked_audio.shape}")
 
-    with torch.no_grad():
-        watermarked_audio, _ = embedder.test_forward(wav, msg)
+        watermarked_audio = watermarked_audio.squeeze().cpu().numpy()
+        
+        if sampling_rate != config["sampling_rate"]:
+            logger.debug(f"Resampling output from {config['sampling_rate']} to {sampling_rate}")
+            watermarked_audio = resample_audio(watermarked_audio, config["sampling_rate"], sampling_rate)
 
-    watermarked_audio = watermarked_audio.squeeze().cpu().numpy()
-    
-    if sampling_rate != config["sampling_rate"]:
-        watermarked_audio = resample_audio(watermarked_audio, config["sampling_rate"], sampling_rate)
-
-    return {"watermarked_audio": watermarked_audio.tolist()}
+        logger.debug("Returning watermarked audio")
+        return {"watermarked_audio": watermarked_audio.tolist()}
+    except Exception as e:
+        logger.error(f"Error in embed endpoint: {str(e)}", exc_info=True)
+        raise
 
 
 @app.post("/detect")
 async def detect(request: DetectRequest):
     """Detect a watermark from an audio file."""
-    audio = np.array(request.audio)
-    sampling_rate = request.sampling_rate
-    if sampling_rate != config["sampling_rate"]:
-        audio = resample_audio(request.audio, sampling_rate, config["sampling_rate"])
+    try:
+        logger.debug(f"Received detect request. Audio length: {len(request.audio)}")
+        audio = np.array(request.audio)
+        sampling_rate = request.sampling_rate
+        logger.debug(f"Audio shape: {audio.shape}, Sampling rate: {sampling_rate}")
+        
+        if sampling_rate != config["sampling_rate"]:
+            logger.debug(f"Resampling from {sampling_rate} to {config['sampling_rate']}")
+            audio = resample_audio(request.audio, sampling_rate, config["sampling_rate"])
 
-    wav = torch.tensor(audio, dtype=torch.float32)
-    wav = wav.unsqueeze(0).unsqueeze(0).to(device)
-    
-    with torch.no_grad():
-        message = detector.test_forward(wav)
-
-    message = (message + 1) / 2
-    message = message.squeeze().cpu().numpy()
-    return {"watermark": message if message is None else message.tolist()}
+        wav = torch.tensor(audio, dtype=torch.float32)
+        wav = wav.unsqueeze(0).unsqueeze(0).to(device)
+        logger.debug(f"WAV tensor shape: {wav.shape}, dtype: {wav.dtype}")
+        
+        logger.debug("Starting model inference")
+        with torch.no_grad():
+            message = detector.test_forward(wav)
+        logger.debug(f"Model inference complete. Result shape: {message.shape}, dtype: {message.dtype}")
+        
+        message = torch.where(message >= 0, 1, -1)
+        message = (message + 1) / 2
+        message = message.squeeze().cpu().numpy()
+        logger.debug(f"Processed message shape: {message.shape}")
+        
+        logger.debug("Returning watermark")
+        return {"watermark": message if message is None else message.tolist()}
+    except Exception as e:
+        logger.error(f"Error in detect endpoint: {str(e)}", exc_info=True)
+        raise
 
 if __name__ == "__main__":
     # Use the default as a fallback if TIMBREWM_PORT is not set in the environment
-    app_port = int(os.getenv("TIMBREWM_PORT", 59001))
+    app_port = int(os.getenv("TIMBREWM_PORT", 9001))
     host = os.environ.get("HOST", "0.0.0.0")
 
     logger.info(f"Starting server on port {app_port}")
-    uvicorn.run(app, host={host}, port={app_port})
+    # Add timeout settings to handle large payloads
+    uvicorn.run(app, host=host, port=app_port, timeout_keep_alive=120)
