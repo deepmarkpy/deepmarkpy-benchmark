@@ -36,7 +36,7 @@ class BaseModel(abc.ABC):
         with open(self.config_path, "r") as json_file:
             self._config = json.load(json_file)
 
-        self.endpoint = None # subclasses must set this
+        self.base_url = None # subclasses must set this
     
     def _make_request(self, endpoint: str, json_data: dict, method: str = "POST", timeout: int = 300) -> dict:
         """

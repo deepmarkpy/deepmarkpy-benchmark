@@ -18,8 +18,8 @@ class WavMarkModel(BaseModel):
             logger.error("WAVMARK_PORT environment variable not set and no default provided.")
             raise ValueError("WAVMARK_PORT must be set")
 
-        self.endpoint = f"http://localhost:{port}"
-        logger.info(f"WavMarkModel initialized. Target API: {self.endpoint}")
+        self.base_url = f"http://localhost:{port}"
+        logger.info(f"WavMarkModel initialized. Target API: {self.base_url}")
 
     def embed(
         self, audio: np.ndarray, watermark_data: np.ndarray, sampling_rate: int

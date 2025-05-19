@@ -1,4 +1,4 @@
-FROM python:3.11-slim-buster AS builder
+FROM python:3.10-slim-buster AS builder
 
 WORKDIR /app
 
@@ -37,7 +37,7 @@ RUN sed -i 's|./hifigan/model/VCTK_V1/generator_v1|TimbreWatermarking/watermarki
 
 
 # Final image
-FROM python:3.11-slim-buster
+FROM python:3.10-slim-buster
 
 WORKDIR /app
 
