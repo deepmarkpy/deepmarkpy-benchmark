@@ -91,7 +91,7 @@ You can check the status of the services using `docker-compose ps`. The first bu
 Ensure the Docker services are running (`docker-compose up -d`) if you are using containerized plugins. Then, execute the main benchmark script from your activated virtual environment (if used) or directly:
 
 ```bash
-python src/run.py --wav_files_dir /path/to/your/audio/files \
+python src/run.py --wav_files_dir /path/to/your/audio/files/dir/ \
                   --wm_model AudioSealModel \
                   --attack_types VAEAttack SpeechEnhancementAttack \
                   # Add any other specific attack parameters like --zero_cross_pause_length 25

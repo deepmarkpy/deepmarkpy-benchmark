@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   audioseal:
     build:
@@ -71,11 +72,11 @@ services:
     environment:
       - APP_PORT=${SPEECH_ENHANCEMENT_PORT}
   
-  timbrewm:
-    build:
-      context: .
-      dockerfile: src/plugins/models/timbrewm/Dockerfile
-    ports:
-      - "${TIMBREWM_PORT}:${TIMBREWM_PORT}"
-    environment:
-      - APP_PORT=${TIMBREWM_PORT}
+  # timbrewm:
+  #   build:
+  #     context: .
+  #     dockerfile: src/plugins/models/timbrewm/Dockerfile
+  #   ports:
+  #     - "${TIMBREWM_PORT}:${TIMBREWM_PORT}"
+  #   environment:
+  #     - APP_PORT=${TIMBREWM_PORT}

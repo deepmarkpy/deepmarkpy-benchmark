@@ -1,0 +1,30 @@
+FROM python:3.11-slim-buster
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libsndfile1 \
+    libgomp1 \
+    git \
+    build-essential \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir \
+    torch==2.7.1 \
+    torchaudio \
+    numpy \
+    scipy \
+    fastapi \
+    uvicorn \
+    pydantic \
+    librosa \
+    soundfile \
+    transformers
+
+# Set up working directory
+WORKDIR /app
+
+# Copy shared utilities (this appears in all your dockerfiles)
+COPY src/utils ./utils
+
+# Set up Python path ###### re-check this line
+ENV PYTHONPATH=/app:$PYTHONPATH
