@@ -17,11 +17,15 @@ FROM ml-services-base:latest
 # Copy BigVGAN from builder
 COPY --from=builder /app/BigVGAN /app/BigVGAN
 
+COPY src/utils /app/BigVGAN/app_utils
+COPY src/plugins/attacks/neural_vocoder/config.json /app/BigVGAN/config.json
+
 COPY /src/plugins/attacks/neural_vocoder/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/plugins/attacks/neural_vocoder .
 
+WORKDIR /app/BigVGAN
 
 # Expose the port defined by the build argument/environment variable
 EXPOSE ${APP_PORT}

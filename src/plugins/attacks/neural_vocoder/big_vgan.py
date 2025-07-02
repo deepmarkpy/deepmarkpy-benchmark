@@ -2,7 +2,7 @@ import os
 import sys
 
 import torch
-from utils.utils import resample_audio
+from app_utils.utils import resample_audio
 
 sys.path.append("BigVGAN")
 
