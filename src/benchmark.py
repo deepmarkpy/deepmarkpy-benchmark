@@ -166,23 +166,35 @@ class Benchmark:
 
                 attack_instance = self.attacks[attack_name]["class"]()
 
+                #in case of the collusion mod attack
+                if (attack_name=="CollusionModificationAttack"):
+                    attack_kwargs["original_audio_collusion"] = audio
+
                 attacked_audio = attack_instance.apply(
                     watermarked_audio, **attack_kwargs
                 )
-
+                
                 detected_message = model_instance.detect(attacked_audio, sampling_rate)
 
-                accuracy = self.compare_watermarks(watermark_data, detected_message)
-
                 if abs(len(audio) - len(attacked_audio)) > 1:
-                    snr_val = "N/A"
+                        snr_val = "N/A"
                 else:
                     snr_val = snr(audio, attacked_audio)
 
+                if (wm_model=="PerthModel"):
+                    print("accuracy is ", detected_message)
+                    if isinstance(detected_message, np.ndarray):
+                        accuracy = detected_message.tolist()
+                    else:
+                       accuracy=detected_message
+                
+                else:             
+                    accuracy = self.compare_watermarks(watermark_data, detected_message)
+                    
                 results[filepath][attack_name] = {
                     "accuracy": accuracy,
                     "snr": snr_val,
-                }
+                    }
 
         return results
 
@@ -206,7 +218,7 @@ class Benchmark:
                 attack_accuracies[attack_name].append(metrics["accuracy"])
 
         mean_accuracies = {
-            attack_name: np.mean(accuracies)
+            attack_name: np.mean([a for a in accuracies if a is not None])
             for attack_name, accuracies in attack_accuracies.items()
         }
         return mean_accuracies
