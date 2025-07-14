@@ -4,3 +4,4 @@ PyWavelets
 pyrubberband
 requests
 scipy
+soundfile
