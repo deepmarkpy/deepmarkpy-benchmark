@@ -182,7 +182,7 @@ class Benchmark:
                     snr_val = snr(audio, attacked_audio)
 
                 if (wm_model=="PerthModel"):
-                    print("accuracy is ", detected_message)
+                    #print("accuracy is ", detected_message)
                     if isinstance(detected_message, np.ndarray):
                         accuracy = detected_message.tolist()
                     else:

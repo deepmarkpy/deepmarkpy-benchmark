@@ -56,46 +56,91 @@ class FlangerAttack(BaseAttack):
 
         self.delay_line.push(x)
         return interp * self.gain + x
+    
 
-
-
-class LFO():
-    def __init__(self, sample_rate, frequency, width, waveform='sine', offset=0, bias=0):
+class LFO:
+    def __init__(self, sample_rate: int, frequency: float, width: float, 
+                 waveform: str = 'sine', offset: float = 0.0, bias: float = 0.0) -> None:
+        """
+        Low-Frequency Oscillator (LFO) for modulating parameters such as delay time.
+        Args:
+            sample_rate (int): Sampling rate of the audio signal.
+            frequency (float): Frequency of the LFO in Hz.
+            width (float): Amplitude of the modulation 
+            waveform (str): Type of waveform ('sine' only currently supported).
+            offset (float): Initial phase offset.
+            bias (float): DC offset to add to the output signal.
+        """
         self.waveform = waveform
         self.width = width
         self.delta = frequency / sample_rate
         self.phase = offset
         self.bias = bias
-        return
 
-    def process(self, n):
+    def process(self, n: int) -> float:
+        """
+        Compute the LFO value at sample index `n`.
+        Args:
+            n (int): The sample index.
+        Returns:
+            float: The modulated value at index `n`.
+        """
         return self.width * math.sin(2 * math.pi * self.delta * n) + self.bias
 
-    def tick(self, i=1):
-        ret = self.width * math.sin(2 * math.pi * self.phase) + self.bias
+    def tick(self, i: int = 1) -> float:
+        """
+        Advances the LFO by `i` samples and returns the current output value.
 
+        Args:
+            i (int): Number of steps to advance the LFO. Default is 1.
+
+        Returns:
+            float: Current modulated value based on the phase.
+        """
+        ret = self.width * math.sin(2 * math.pi * self.phase) + self.bias
         self.phase += i * self.delta
-        if( self.phase > 1.0):
+        if self.phase > 1.0:
             self.phase -= 1.0
         return ret
     
+class Delay:
+    def __init__(self, delay_length: int) -> None:
+        """
+        Implements a circular delay buffer for audio processing.
+        Args:
+            delay_length (int): Total length of the delay buffer.
+        """
+        self.length: int = delay_length
+        self.buffer: np.ndarray = np.zeros(delay_length)
+        self.pos: int = 0
 
-class Delay():
-    def __init__(self, delay_length):
-        self.length = delay_length
-        self.buffer = np.zeros(delay_length)
-        self.pos = 0
-
-    def front(self):
+    def front(self) -> float:
+        """
+        Returns the current value at the write position.
+        Returns:
+            float: Sample at the current write position.
+        """
         return self.buffer[self.pos]
-    
-    def push(self, x):
+
+    def push(self, x: float) -> None:
+        """
+        Inserts a new sample into the delay buffer.
+        Args:
+            x (float): New sample to insert.
+        """
         self.buffer[self.pos] = x
-        self.pos = self.pos + 1
-        if self.pos + 1 >= self.length :
-            self.pos = self.pos - self.length 
-    
-    def go_back(self, idx):
+        self.pos += 1
+        if self.pos +1 >= self.length:
+            self.pos -= self.length
+
+    def go_back(self, idx: int) -> float:
+        """
+        Retrieves a sample from `idx` steps ago in the delay buffer.
+        Args:
+            idx (int): How many samples back to access.
+        Returns:
+            float: The delayed sample.
+        """
         target = self.pos - idx
         if target < 0 :
             target = target + self.length 

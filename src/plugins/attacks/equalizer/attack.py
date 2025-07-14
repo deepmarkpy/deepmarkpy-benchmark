@@ -57,13 +57,26 @@ class EqualizerAttack(BaseAttack):
 
 class Biquad():
     def __init__(
-        self, 
-        sample_rate, 
-        filter_type=None,
-        fc=1000,
-        bandwidth=1.0,
-        gain_db=1.0
-    ):
+        self,
+        sample_rate: float,
+        filter_type: str = None,
+        fc: float = 1000.0,
+        bandwidth: float = 1.0,
+        gain_db: float = 1.0
+    ) -> None:
+        """
+        Implements a biquad IIR filter for common audio filter types.
+        Args:
+            sample_rate (float): Sampling rate of the signal.
+            filter_type (str): Type of the filter. Options:
+                "LowPass", "HighPass", "BandPass", "AllPass", "Notch",
+                "Peaking", "LowShelf", "HighShelf".
+            fc (float): Cutoff/center frequency in Hz.
+            bandwidth (float): Bandwidth of the filter in Hz.
+            gain_db (float): Gain in dB for peaking and shelving filters.
+        Raises:
+            ValueError: For invalid sample_rate, fc, or filter_type values.
+        """
         if sample_rate < 0.0:
             raise ValueError("sample_rate cannot be given a negative value")
         self.sample_rate = sample_rate
@@ -166,14 +179,25 @@ class Biquad():
         self.b /= self.a[0]
         self.a /= self.a[0]
         
-    def process(self, x):
-        y = self.b[0] * x\
-            + self.b[1] * self.x_buf[1]\
-            + self.b[2] * self.x_buf[0]\
-            - self.a[1] * self.y_buf[1]\
-            - self.a[2] * self.y_buf[0]
+    def process(self, x: float) -> float:
+        """
+        Processes a single input sample using the biquad filter.
+        Args:
+            x (float): Input audio sample.
+        Returns:
+            float: Filtered output sample.
+        """
+        y = (
+            self.b[0] * x +
+            self.b[1] * self.x_buf[1] +
+            self.b[2] * self.x_buf[0] -
+            self.a[1] * self.y_buf[1] -
+            self.a[2] * self.y_buf[0]
+        )
+
         self.x_buf[0] = self.x_buf[1]
         self.x_buf[1] = x
         self.y_buf[0] = self.y_buf[1]
         self.y_buf[1] = y
+
         return y
