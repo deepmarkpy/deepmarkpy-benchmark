@@ -167,7 +167,7 @@ class Benchmark:
                 attack_instance = self.attacks[attack_name]["class"]()
 
                 #in case of the collusion mod attack
-                if (attack_name=="CollusionModificationAttack"):
+                if (attack_name=="ZeroBitCollusionAttack"):
                     attack_kwargs["original_audio_collusion"] = audio
 
                 attacked_audio = attack_instance.apply(
@@ -177,7 +177,7 @@ class Benchmark:
                 detected_message = model_instance.detect(attacked_audio, sampling_rate)
 
                 if abs(len(audio) - len(attacked_audio)) > 1:
-                        snr_val = "N/A"
+                    snr_val = "N/A"
                 else:
                     snr_val = snr(audio, attacked_audio)
 

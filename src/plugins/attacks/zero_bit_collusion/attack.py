@@ -2,7 +2,7 @@ import numpy as np
 
 from core.base_attack import BaseAttack
 
-class CollusionModificationAttack(BaseAttack):
+class ZeroBitCollusionAttack(BaseAttack):
 
     def apply(self, audio: np.ndarray, **kwargs) -> np.ndarray:
         """
@@ -25,6 +25,7 @@ class CollusionModificationAttack(BaseAttack):
 
         sampling_rate = kwargs.get("sampling_rate", None)
         original_audio=kwargs.get("original_audio_collusion",None)
+        original_audio=original_audio.copy()
         x = kwargs.get(
             "x", self.config.get("x")
         )
@@ -41,7 +42,7 @@ class CollusionModificationAttack(BaseAttack):
         
         num_samples = int(len(original_audio) * x / 100)
 
-        reconstructed_audio=audio
+        reconstructed_audio=audio.copy()
     
         if (position=="front"):
            

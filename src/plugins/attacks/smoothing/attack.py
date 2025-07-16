@@ -2,7 +2,7 @@ import numpy as np
 
 from core.base_attack import BaseAttack
 
-class SmoothAttack(BaseAttack):
+class SmoothingAttack(BaseAttack):
     """
         Perform a smoothing attack on an audio signal with a uniform moving average filter.
         Args:
