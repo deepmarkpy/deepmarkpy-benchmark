@@ -1,0 +1,7 @@
+{
+    "name": "Perth",
+    "type": "model",
+    "variant": "docker",
+    "sampling_rate": 44100,
+    "watermark_size": 10
+}

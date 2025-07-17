@@ -83,7 +83,8 @@ If using time stretch and pitch shift attacks on Windows, you'll need Rubberband
 
 This command builds the Docker images for all containerized models/attacks (defined in `docker-compose.yml`) using the configuration from `.env` and starts them in the background. This step is **required** if you intend to use plugins like `audioseal`, `vae`, `diffusion`, etc.
 ```bash
-docker-compose up --build -d
+docker build -f Dockerfile.base -t ml-services-base:latest .
+docker-compose -f docker-compose.yml build
 ```
 You can check the status of the services using `docker-compose ps`. The first build might take some time.
 
@@ -91,7 +92,7 @@ You can check the status of the services using `docker-compose ps`. The first bu
 Ensure the Docker services are running (`docker-compose up -d`) if you are using containerized plugins. Then, execute the main benchmark script from your activated virtual environment (if used) or directly:
 
 ```bash
-python src/run.py --wav_files_dir /path/to/your/audio/files \
+python src/run.py --wav_files_dir /path/to/your/audio/files/dir/ \
                   --wm_model AudioSealModel \
                   --attack_types VAEAttack SpeechEnhancementAttack \
                   # Add any other specific attack parameters like --zero_cross_pause_length 25

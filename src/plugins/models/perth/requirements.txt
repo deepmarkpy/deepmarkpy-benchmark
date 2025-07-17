@@ -1,0 +1,10 @@
+resemble-perth
+fastapi
+uvicorn
+numpy
+torch==2.7.1
+torchaudio==2.7.1
+pyyaml
+librosa
+soundfile
+pydantic

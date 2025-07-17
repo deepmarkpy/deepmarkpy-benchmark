@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   audioseal:
     build:
@@ -79,3 +80,12 @@ services:
       - "${TIMBREWM_PORT}:${TIMBREWM_PORT}"
     environment:
       - APP_PORT=${TIMBREWM_PORT}
+
+  perth:
+    build:
+      context: .
+      dockerfile: src/plugins/models/perth/Dockerfile
+    ports:
+      - "${PERTH_PORT}:${PERTH_PORT}"
+    environment:
+      - APP_PORT=${PERTH_PORT}

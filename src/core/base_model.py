@@ -62,11 +62,13 @@ class BaseModel(abc.ABC):
 
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
 
+
         try:
             logger.info(f"Making {method} request to {url} with data: {json_data}")
             response = requests.request(method, url, json=json_data, timeout=timeout)
             response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
             return response.json()
+        
         except requests.exceptions.RequestException as e:
             logger.error(f"Request to {url} failed: {e}")
             raise # Re-raise the exception for the caller to handle
