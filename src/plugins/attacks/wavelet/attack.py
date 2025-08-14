@@ -20,8 +20,9 @@ class WaveletAttack(BaseAttack):
         """
         wavelet = kwargs.get("wavelet", self.config.get("wavelet"))
         mode = kwargs.get("wt_mode", self.config.get("wt_mode"))
+        threshold_factor = kwargs.get("threshold_factor", self.config.get("threshold_factor"))
 
-        threshold = self.compute_threshold(audio, wavelet)
+        threshold = self.compute_threshold(audio, wavelet, threshold_factor)
 
         coeffs = pywt.wavedec(audio, wavelet)
         coeffs_denoised = [pywt.threshold(c, threshold, mode=mode) for c in coeffs]
@@ -30,13 +31,14 @@ class WaveletAttack(BaseAttack):
 
         return denoised_audio
 
-    def compute_threshold(self, audio, wavelet):
+    def compute_threshold(self, audio, wavelet, threshold_factor):
         """
         Compute the universal threshold for wavelet-based denoising.
 
         Args:
             audio (np.ndarray): Input audio signal.
             wavelet (str): Wavelet type (e.g., 'db1', 'sym5', etc.) used for decomposition.
+            threshold_factor (float): Threshold factor for the universal threshold.
 
         Returns:
             float: The calculated threshold value.
@@ -53,8 +55,8 @@ class WaveletAttack(BaseAttack):
               additive white Gaussian noise.
 
         """
-
+        print("threshold_factor je ", threshold_factor)
         coeffs = pywt.wavedec(audio, wavelet)
         sigma = np.median(np.abs(coeffs[-1])) / 0.6745
-        threshold = sigma * np.sqrt(2 * np.log(len(audio)))
+        threshold = sigma * np.sqrt(2 * np.log(len(audio))) * threshold_factor
         return threshold

@@ -40,7 +40,7 @@ class SpeechTokenizationAttack(BaseAttack):
             raise
         
         if "audio" not in response_data:
-             logger.error("'/attack' response does not contain 'audio' key.")
-             raise KeyError("Missing 'audio' in response from /attack")
+             logger.error("'/apply' response does not contain 'audio' key.")
+             raise KeyError("Missing 'audio' in response from /apply")
         return np.array(response_data["audio"])
 
