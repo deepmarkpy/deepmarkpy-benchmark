@@ -44,9 +44,8 @@ async def attack(request: AttackRequest):
 
 
 if __name__ == "__main__":
-    # Use the default as a fallback if SPEECH_TOKENIZATION_PORT is not set in the environment
-    app_port = int(os.getenv("SPEECH_TOKENIZATION_PORT", 10001))
+    app_port = int(os.getenv("APP_PORT") or os.getenv("SPEECH_TOKENIZATION_PORT", "10003"))
     host = os.environ.get("HOST", "0.0.0.0")
 
-    logger.info(f"Starting server on port {app_port}")
-    uvicorn.run(app, host={host}, port={app_port})
+    logger.info(f"Starting server on {host}:{app_port}")
+    uvicorn.run(app, host=host, port=app_port)

@@ -27,14 +27,20 @@ class SpeechTokenizationAttack(BaseAttack):
         if sampling_rate is None:
             raise ValueError("'sampling_rate' must be provided in kwargs.")
 
-        response = requests.post(
-            self.endpoint + "/attack",
-            json={"audio": audio.tolist(), "sampling_rate": sampling_rate},
-        )
-        response_data = response.json()
+        try:
+            response = requests.post(
+                self.endpoint + "/attack",
+                json={"audio": audio.tolist(), "sampling_rate": sampling_rate},
+                timeout=180,
+            )
+            response.raise_for_status()
+            response_data = response.json()
+        except requests.exceptions.RequestException as e:
+            logger.error(f"SpeechTokenizationAttack request failed: {e}")
+            raise
         
         if "audio" not in response_data:
-             logger.error("'/apply' response does not contain 'audio' key.")
-             raise KeyError("Missing 'audio' in response from /apply")
+             logger.error("'/attack' response does not contain 'audio' key.")
+             raise KeyError("Missing 'audio' in response from /attack")
         return np.array(response_data["audio"])
 

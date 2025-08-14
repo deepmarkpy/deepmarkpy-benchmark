@@ -25,7 +25,7 @@ class ZeroBitCollusionAttack(BaseAttack):
 
         sampling_rate = kwargs.get("sampling_rate", None)
         original_audio=kwargs.get("original_audio_collusion",None)
-        original_audio=original_audio.copy()
+        # original_audio=original_audio.copy()
         x = kwargs.get(
             "x", self.config.get("x")
         )
@@ -39,10 +39,19 @@ class ZeroBitCollusionAttack(BaseAttack):
         
         if original_audio is None:
             raise ValueError("'original_audio_collusion' must be provided in kwargs.")
-        
-        num_samples = int(len(original_audio) * x / 100)
 
-        reconstructed_audio=audio.copy()
+        original_audio = original_audio.copy()
+
+        wm_len = len(audio)
+        orig_len = len(original_audio)
+        min_len = min(wm_len, orig_len)
+
+        num_samples = int(min_len * x / 100)
+
+        if num_samples <= 0:
+            return audio
+
+        reconstructed_audio = audio.copy()
     
         if (position=="front"):
            
@@ -52,14 +61,12 @@ class ZeroBitCollusionAttack(BaseAttack):
            
         elif (position=="end"):
             
-            audio_first_part = audio[:len(audio)-num_samples]
-            audio_second_part = original_audio[len(audio)-num_samples:]
+            audio_first_part = audio[:wm_len - num_samples]
+            audio_second_part = original_audio[-num_samples:]
             reconstructed_audio = np.concatenate((audio_first_part, audio_second_part), axis=0)
             
         elif (position=="random"):
-            replace_indices = np.random.choice(len(audio), size=num_samples, replace=False)
-            #print(replace_indices.shape)  # should be (num_samples,)
-            #print(replace_indices.dtype) 
+            replace_indices = np.random.choice(min_len, size=num_samples, replace=False)
             reconstructed_audio[replace_indices] = original_audio[replace_indices]
 
         return reconstructed_audio
