@@ -17,7 +17,7 @@ class HighpassFilterAttack(BaseAttack):
         Returns:
             np.ndarray: The processed audio signal with the high-pass filtering applied.
 
-        Raises:
+        Raises:dcd
             ValueError: If the `sampling_rate` is not provided in `kwargs`.
 
         """
