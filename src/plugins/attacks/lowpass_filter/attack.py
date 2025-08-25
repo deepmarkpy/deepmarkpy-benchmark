@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import signal
-
 from core.base_attack import BaseAttack
 
 class LowpassFilterAttack(BaseAttack):
@@ -34,8 +33,6 @@ class LowpassFilterAttack(BaseAttack):
        
         nyquist = 0.5 * sampling_rate
         normalized_cutoff = cutoff_freq / nyquist
-
-    
         b, a = signal.butter(order, normalized_cutoff, btype='low', analog=False)
         filtered_signal = signal.lfilter(b, a, audio)
 
