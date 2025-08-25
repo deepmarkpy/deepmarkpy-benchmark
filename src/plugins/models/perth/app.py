@@ -68,4 +68,3 @@ async def detect(request: DetectRequest):
     if isinstance(message, np.ndarray) and message.ndim == 0:
         message = message.item() # Converts a 0-d NumPy array to its scalar equivalent
     return {"watermark": message}
-
