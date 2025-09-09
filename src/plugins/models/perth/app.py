@@ -68,12 +68,3 @@ async def detect(request: DetectRequest):
     if isinstance(message, np.ndarray) and message.ndim == 0:
         message = message.item() # Converts a 0-d NumPy array to its scalar equivalent
     return {"watermark": message}
-
-if __name__ == "__main__":
-    import uvicorn
-    # Use the default as a fallback if SILENTCIPHER_PORT is not set in the environment
-    app_port = int(os.getenv("PERTH_PORT", 7010))
-    host = os.environ.get("HOST", "0.0.0.0")
-
-    logger.info(f"Starting server on port {app_port}")
-    uvicorn.run(app, host={host}, port={app_port})
